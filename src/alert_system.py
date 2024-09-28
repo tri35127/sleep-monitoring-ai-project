@@ -1,19 +1,14 @@
-import tkinter as tk
-from datetime import datetime
+from datetime import datetime, timedelta
 
-# Hiển thị cảnh báo trên giao diện ứng dụng (popup)
-def show_popup_alert(message):
-    root = tk.Tk()
-    root.title("Alert")
+# Biến lưu thời gian lần cảnh báo cuối cùng
+last_alert_time = None
 
-    # Thiết lập giao diện đơn giản cho popup
-    label = tk.Label(root, text=message, padx=20, pady=20, font=("Arial", 14))
-    label.pack()
+# Thời gian tối thiểu giữa các lần cảnh báo (10 giây)
+ALERT_INTERVAL = timedelta(seconds=3)
 
-    button = tk.Button(root, text="OK", command=root.destroy, padx=10, pady=5)
-    button.pack()
-
-    root.mainloop()
+# Hiển thị cảnh báo bằng cách in ra màn hình
+def show_alert(message):
+    print(f"ALERT: {message}")
 
 # Ghi log cảnh báo vào file
 def log_alert(message, log_file="alert_log.txt"):
@@ -22,12 +17,27 @@ def log_alert(message, log_file="alert_log.txt"):
         f.write(f"{time_now} - {message}\n")
     print(f"Logged alert: {message}")
 
+# Hàm kiểm tra xem đã đủ thời gian giữa các lần cảnh báo chưa
+def can_send_alert():
+    global last_alert_time
+    current_time = datetime.now()
+
+    if last_alert_time is None or (current_time - last_alert_time) >= ALERT_INTERVAL:
+        return True
+    return False
+
 # Hàm chính để gửi cảnh báo
 def send_alert(message):
-    # Chỉ sử dụng popup để thông báo
-    show_popup_alert(message)
+    global last_alert_time  # Sử dụng biến toàn cục để cập nhật thời gian
+    # Chỉ gửi cảnh báo nếu đủ thời gian (10 giây)
+    if can_send_alert():
+        # In thông báo ra màn hình
+        show_alert(message)
 
-    # Ghi log mỗi lần có cảnh báo
-    log_alert(message)
+        # Ghi log mỗi lần có cảnh báo
+        log_alert(message)
 
-
+        # Cập nhật thời gian cảnh báo cuối cùng
+        last_alert_time = datetime.now()
+    else:
+       pass

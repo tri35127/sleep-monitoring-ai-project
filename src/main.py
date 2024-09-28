@@ -1,11 +1,10 @@
 import cv2
-from person_detection import detect_person
+from person_detection import detect_person, draw_bed_area
 from pose_estimation import estimate_pose
+from face_detection import detect_face
 import mediapipe as mp
 
-# Khởi tạo vẽ khung xương sử dụng MediaPipe
-mp_drawing = mp.solutions.drawing_utils
-mp_pose = mp.solutions.pose
+# Khởi tạo vẽ khung xương sử dụng MediaPipeq
 
 # Vẽ bounding box xung quanh người
 def draw_bounding_boxes(frame, persons):
@@ -36,6 +35,12 @@ def process_camera_feed():
         # Phát hiện người
         persons = detect_person(frame)
         draw_bounding_boxes(frame, persons)  # Vẽ bounding box xung quanh người
+
+        # Vẽ bounding box cho vùng giường
+        draw_bed_area(frame)
+
+        # Phát hiện khuôn mặt và cảnh báo nếu khuôn mặt bị che
+        detect_face(frame)
 
         # Nhận diện khung xương
         keypoints = estimate_pose(frame)
