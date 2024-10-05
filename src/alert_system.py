@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 last_alert_time = None
 
 # Thời gian tối thiểu giữa các lần cảnh báo (10 giây)
-ALERT_INTERVAL = timedelta(seconds=3)
+ALERT_INTERVAL = timedelta(seconds=10)
 
 # Hiển thị cảnh báo bằng cách in ra màn hình
 def show_alert(message):
@@ -12,10 +12,11 @@ def show_alert(message):
 
 # Ghi log cảnh báo vào file
 def log_alert(message, log_file="alert_log.txt"):
-    with open(log_file, "a") as f:
+    with open(log_file, "a", encoding="utf-8") as f:
         time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"{time_now} - {message}\n")
     print(f"Logged alert: {message}")
+
 
 # Hàm kiểm tra xem đã đủ thời gian giữa các lần cảnh báo chưa
 def can_send_alert():
