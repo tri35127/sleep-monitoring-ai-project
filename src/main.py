@@ -1,6 +1,5 @@
 import cv2
 from person_detection import detect_person, draw_bed_area, save_bed_area, load_bed_area, select_bed_area
-
 # Vẽ bounding box xung quanh người
 def draw_bounding_boxes(frame, persons):
     for person in persons:

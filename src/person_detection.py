@@ -79,7 +79,7 @@ def calculate_intersection_area(person_bbox, bed_area):
     return calculate_area(inter_x1, inter_y1, inter_x2, inter_y2)
 
 # Hàm kiểm tra người có ở ngoài vùng giường không
-def is_person_outside_bed(person_bbox, bed_area, threshold=0.5):
+def is_person_outside_bed(person_bbox, bed_area, threshold=0.6):
     """Kiểm tra xem người có ở ngoài vùng giường với tỉ lệ nhất định không."""
     person_area = calculate_area(*map(int, person_bbox))
     intersection_area = calculate_intersection_area(person_bbox, bed_area)
