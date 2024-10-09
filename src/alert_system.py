@@ -1,24 +1,23 @@
 from datetime import datetime, timedelta
 
-# Biến lưu thời gian lần cảnh báo cuối cùng
+# Variable to store the last alert time
 last_alert_time = None
 
-# Thời gian tối thiểu giữa các lần cảnh báo (10 giây)
+# Minimum time between alerts (10 seconds)
 ALERT_INTERVAL = timedelta(seconds=10)
 
-# Hiển thị cảnh báo bằng cách in ra màn hình
+# Display alert by printing to the console
 def show_alert(message):
     print(f"ALERT: {message}")
 
-# Ghi log cảnh báo vào file
+# Log alert to a file
 def log_alert(message, log_file="alert_log.txt"):
     with open(log_file, "a", encoding="utf-8") as f:
         time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"{time_now} - {message}\n")
     print(f"Logged alert: {message}")
 
-
-# Hàm kiểm tra xem đã đủ thời gian giữa các lần cảnh báo chưa
+# Function to check if enough time has passed between alerts
 def can_send_alert():
     global last_alert_time
     current_time = datetime.now()
@@ -27,18 +26,26 @@ def can_send_alert():
         return True
     return False
 
-# Hàm chính để gửi cảnh báo
+# Main function to send alerts
 def send_alert(message):
-    global last_alert_time  # Sử dụng biến toàn cục để cập nhật thời gian
-    # Chỉ gửi cảnh báo nếu đủ thời gian (10 giây)
+    global last_alert_time  # Use global variable to update the time
+    # Only send alert if enough time has passed (10 seconds)
     if can_send_alert():
-        # In thông báo ra màn hình
+        # Print the message to the console
         show_alert(message)
 
-        # Ghi log mỗi lần có cảnh báo
+        # Log each alert
         log_alert(message)
 
-        # Cập nhật thời gian cảnh báo cuối cùng
+        # Update the last alert time
         last_alert_time = datetime.now()
-    else:
-       pass
+    # else:  # No need for an explicit 'else' if you're just passing
+    #     pass
+
+# Function to send alerts based on posture and sleep_quality
+def alert_posture_and_sleep(posture, restless_sleep):
+
+    if posture == "unknown":
+        send_alert(f"Alert: Unusual sleep posture: {posture}")
+    if restless_sleep:
+        send_alert("Alert: Restless sleep detected!")
