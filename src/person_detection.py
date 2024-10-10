@@ -2,6 +2,15 @@ import cv2
 import json
 from ultralytics import YOLO
 from alert_system import send_alert
+import torch
+
+# Check if MPS (Metal Performance Shaders) is available
+if torch.backends.mps.is_available():
+    device = torch.device("mps")
+    print("Using MPS device.")
+else:
+    device = torch.device("cpu")  # Fallback to CPU if MPS is not available
+    print("MPS not available. Using CPU.")
 
 # Khởi tạo mô hình YOLO v10
 model = YOLO("../data/yolov10n.pt")
@@ -169,10 +178,23 @@ def select_bed_area(frame):
 
     return None
 
+def draw_bounding_boxes(frame, persons):
+    for person in persons:
+        x1, y1, x2, y2 = map(int, person)  # Bounding box coordinates
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green box
+
+# Initialize or load bed area
+def initialize_bed_area(frame, bed_area):
+    if bed_area is None:
+        print("No bed area found. Please select the bed area.")
+        bed_area = select_bed_area(frame)
+        if bed_area is not None:
+            save_bed_area(bed_area)
+    return bed_area
 
 # Phát hiện người và cảnh báo khi người ở ngoài giường
 def detect_person(frame, bed_area):
-    results = model(frame, verbose=False)
+    results = model(frame, verbose=False, device=device)
     persons = []
 
     for result in results:

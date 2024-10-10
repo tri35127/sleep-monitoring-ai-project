@@ -1,15 +1,23 @@
 import cv2
 import numpy as np
-from ultralytics import YOLO
 from alert_system import send_alert
+import torch
+from ultralytics import YOLO
 
+# Check if MPS (Metal Performance Shaders) is available
+if torch.backends.mps.is_available():
+    device = torch.device("mps")
+    print("Using MPS device.")
+else:
+    device = torch.device("cpu")  # Fallback to CPU if MPS is not available
+    print("MPS not available. Using CPU.")
 # Load YOLOv8 Pose model
 model = YOLO("../data/yolo11m-pose.pt")  # Replace with the correct path to your YOLO model
 
 
 def estimate_pose(frame):
     # Perform inference with YOLO
-    results = model.predict(frame, verbose=False)
+    results = model.predict(frame, verbose=False, device=device)
 
     keypoints = []
     for result in results:
@@ -71,3 +79,11 @@ def classify_posture(keypoints):
     send_alert("unknown")
     return "unknown"
 
+def draw_pose(frame, keypoints, offset_x, offset_y):
+    for i, keypoint in enumerate(keypoints[0]):
+        if (keypoint[0], keypoint[1]) != (0, 0):  # Check if keypoint is valid
+            x, y = int(keypoint[0]) + offset_x, int(keypoint[1]) + offset_y
+            cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)  # Draw keypoint (red)
+
+            # Display keypoint index
+            cv2.putText(frame, str(i), (x + 5, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
