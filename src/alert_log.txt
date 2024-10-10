@@ -296,3 +296,107 @@
 2024-10-10 15:47:42 - abnormal_sleeping_position
 2024-10-10 15:47:52 - Cảnh báo: Trẻ đã rời khỏi giường!
 2024-10-10 15:48:02 - abnormal_sleeping_position
+2024-10-10 15:50:49 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 15:50:59 - abnormal_sleeping_position
+2024-10-10 15:51:09 - abnormal_sleeping_position
+2024-10-10 15:53:36 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 15:53:46 - abnormal_sleeping_position
+2024-10-10 15:53:56 - standing
+2024-10-10 16:02:49 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:02:59 - abnormal_sleeping_position
+2024-10-10 16:03:11 - sitting
+2024-10-10 16:03:21 - lying_down
+2024-10-10 16:03:31 - sitting
+2024-10-10 16:03:46 - lying_down
+2024-10-10 16:03:59 - lying_down
+2024-10-10 16:04:15 - sitting
+2024-10-10 16:04:27 - sitting
+2024-10-10 16:04:37 - abnormal_sleeping_position
+2024-10-10 16:04:47 - sitting
+2024-10-10 16:05:02 - sitting
+2024-10-10 16:05:12 - abnormal_sleeping_position
+2024-10-10 16:05:25 - abnormal_sleeping_position
+2024-10-10 16:05:35 - abnormal_sleeping_position
+2024-10-10 16:05:53 - lying_down
+2024-10-10 16:06:03 - abnormal_sleeping_position
+2024-10-10 16:06:14 - sitting
+2024-10-10 16:06:27 - sitting
+2024-10-10 16:07:23 - lying_down
+2024-10-10 16:07:50 - lying_down
+2024-10-10 16:08:00 - abnormal_sleeping_position
+2024-10-10 16:08:12 - abnormal_sleeping_position
+2024-10-10 16:08:23 - lying_down
+2024-10-10 16:08:33 - abnormal_sleeping_position
+2024-10-10 16:08:43 - abnormal_sleeping_position
+2024-10-10 16:08:53 - abnormal_sleeping_position
+2024-10-10 16:09:03 - abnormal_sleeping_position
+2024-10-10 16:09:18 - abnormal_sleeping_position
+2024-10-10 16:09:29 - sitting
+2024-10-10 16:09:39 - abnormal_sleeping_position
+2024-10-10 16:22:01 - abnormal_sleeping_position
+2024-10-10 16:22:11 - lying_down
+2024-10-10 16:22:21 - abnormal_sleeping_position
+2024-10-10 16:22:32 - standing
+2024-10-10 16:22:42 - standing
+2024-10-10 16:22:52 - lying_down
+2024-10-10 16:24:17 - sitting
+2024-10-10 16:24:27 - standing
+2024-10-10 16:24:38 - abnormal_sleeping_position
+2024-10-10 16:24:48 - abnormal_sleeping_position
+2024-10-10 16:24:59 - abnormal_sleeping_position
+2024-10-10 16:25:09 - abnormal_sleeping_position
+2024-10-10 16:25:19 - sitting
+2024-10-10 16:25:29 - abnormal_sleeping_position
+2024-10-10 16:25:39 - abnormal_sleeping_position
+2024-10-10 16:25:51 - sitting
+2024-10-10 16:26:01 - sitting
+2024-10-10 16:26:12 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:26:22 - abnormal_sleeping_position
+2024-10-10 16:26:32 - standing
+2024-10-10 16:26:42 - abnormal_sleeping_position
+2024-10-10 16:27:57 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:28:07 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:28:17 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:28:27 - standing
+2024-10-10 16:28:38 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:29:20 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:29:30 - sitting
+2024-10-10 16:29:40 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:29:50 - sitting
+2024-10-10 16:30:00 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:30:10 - lying_down
+2024-10-10 16:40:42 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:40:57 - lying_down
+2024-10-10 16:41:30 - lying_down
+2024-10-10 16:41:40 - abnormal_sleeping_position
+2024-10-10 16:53:59 - abnormal_sleeping_position
+2024-10-10 16:54:09 - abnormal_sleeping_position
+2024-10-10 16:54:19 - sitting
+2024-10-10 16:54:29 - standing
+2024-10-10 16:54:39 - lying_down
+2024-10-10 16:54:49 - abnormal_sleeping_position
+2024-10-10 16:55:00 - abnormal_sleeping_position
+2024-10-10 16:55:10 - abnormal_sleeping_position
+2024-10-10 16:55:34 - abnormal_sleeping_position
+2024-10-10 16:55:44 - abnormal_sleeping_position
+2024-10-10 16:55:55 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:56:05 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:56:17 - standing
+2024-10-10 16:56:28 - lying_down
+2024-10-10 16:56:38 - lying_down
+2024-10-10 16:57:07 - lying_down
+2024-10-10 16:57:33 - sitting
+2024-10-10 16:57:44 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 16:57:54 - sitting
+2024-10-10 16:58:04 - standing
+2024-10-10 16:58:15 - sitting
+2024-10-10 16:58:25 - lying_down
+2024-10-10 16:58:36 - lying_down
+2024-10-10 16:58:46 - lying_down
+2024-10-10 16:58:56 - abnormal_sleeping_position
+2024-10-10 17:30:00 - abnormal_sleeping_position
+2024-10-10 17:30:10 - abnormal_sleeping_position
+2024-10-10 17:30:20 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 17:30:30 - abnormal_sleeping_position
+2024-10-10 17:30:40 - lying_down
+2024-10-10 17:30:50 - abnormal_sleeping_position

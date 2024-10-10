@@ -42,7 +42,7 @@ def draw_bed_area(frame, bed_area):
     cv2.rectangle(frame, (bed_x1, bed_y1), (bed_x2, bed_y2), (255, 0, 0), 2)  # Màu xanh dương
 
 # Tạo vùng giường từ bounding box của người, với tỉ lệ phóng to 1.5x
-def create_bed_area_from_person_bbox(bbox, scale_factor=1.5):
+def create_bed_area_from_person_bbox(bbox, scale_factor=1.05):
     x1, y1, x2, y2 = map(int, bbox)
     width = x2 - x1
     height = y2 - y1
