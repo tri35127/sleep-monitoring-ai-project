@@ -3,22 +3,25 @@ import numpy as np
 from ultralytics import YOLO
 
 # Load YOLOv8 Pose model
-model = YOLO("sleep-monitoring-ai-project-main/data/yolo11m-pose.pt")  # Replace with the correct path to your YOLO model
+model = YOLO("../data/yolo11m-pose.pt")  # Replace with the correct path to your YOLO model
+
 
 def estimate_pose(frame):
     # Perform inference with YOLO
     results = model.predict(frame, verbose=False)
-    for result in results:
-        keypoints = result.keypoints.xy
-    return keypoints
 
-    return None  # Return None if no keypoints detected
+    keypoints = []
+    for result in results:
+        if result.keypoints is not None:
+            keypoints = result.keypoints.xy.cpu().numpy()  # Get keypoints as numpy array
+            print(keypoints)
+    # Use .size to check if the array has elements
+    return keypoints if keypoints.size > 0 else None  # Return None if no keypoints detected
 
 
 # Classify posture based on detected keypoints
 def classify_posture(keypoints):
-    # Verify the keypoints have enough data to determine posture
-    if len(keypoints) < 13:
+    if keypoints is None or len(keypoints) < 13:
         return "unknown"
 
     head = keypoints[0]  # Nose keypoint
@@ -49,6 +52,7 @@ def classify_posture(keypoints):
         return "standing"
 
     return "unknown"
+
 
 # Function to send an alert for detected posture
 def send_alert(alert_type):
