@@ -41,11 +41,3 @@ def send_alert(message):
         last_alert_time = datetime.now()
     # else:  # No need for an explicit 'else' if you're just passing
     #     pass
-
-# Function to send alerts based on posture and sleep_quality
-def alert_posture_and_sleep(posture, restless_sleep):
-
-    if posture == "unknown":
-        send_alert(f"Alert: Unusual sleep posture: {posture}")
-    if restless_sleep:
-        send_alert("Alert: Restless sleep detected!")

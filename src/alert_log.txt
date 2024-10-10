@@ -129,3 +129,13 @@
 2024-10-10 11:12:20 - Cảnh báo: Trẻ đã rời khỏi giường!
 2024-10-10 11:12:30 - Cảnh báo: Trẻ đã rời khỏi giường!
 2024-10-10 11:12:40 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 13:07:25 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 13:07:35 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 13:07:46 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 13:07:59 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 13:08:09 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-10-10 13:28:09 - abnormal_sleeping_position
+2024-10-10 13:28:19 - abnormal_sleeping_position
+2024-10-10 13:29:35 - abnormal_sleeping_position
+2024-10-10 13:29:45 - abnormal_sleeping_position
+2024-10-10 13:29:55 - abnormal_sleeping_position
