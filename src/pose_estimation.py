@@ -53,11 +53,6 @@ def classify_posture(keypoints):
     avg_shoulder_y = (left_shoulder[1] + right_shoulder[1]) / 2
     avg_hip_y = (left_hip[1] + right_hip[1]) / 2
 
-    # Check for lying down (head, shoulders, hips roughly aligned horizontally)
-    if np.abs(head[1] - avg_shoulder_y) < 0.1 and np.abs(avg_shoulder_y - avg_hip_y) < 0.1:
-        send_alert("lying_down")
-        return "lying_down"
-
     # Check for sitting (hips below shoulders, significant difference in vertical height)
     if avg_hip_y > avg_shoulder_y and head[1] > avg_shoulder_y:
         send_alert("sitting")
@@ -67,15 +62,7 @@ def classify_posture(keypoints):
     if head[1] < avg_shoulder_y and avg_shoulder_y > avg_hip_y:
         send_alert("standing")
         return "standing"
-
-    # Check for abnormal sleeping positions (tilted or twisted body)
-    head_distance_shoulder = np.abs(head[1] - avg_shoulder_y)
-    shoulder_distance_hip = np.abs(avg_shoulder_y - avg_hip_y)
-
-    # Define thresholds for abnormal positions
-    if head_distance_shoulder > 0.2 or shoulder_distance_hip > 0.3:
-        send_alert("abnormal_sleeping_position")
-        return "abnormal_sleeping_position"
+    
     send_alert("unknown")
     return "unknown"
 

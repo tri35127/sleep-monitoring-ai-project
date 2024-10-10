@@ -7,10 +7,8 @@ import torch
 # Kiểm tra nếu MPS (Metal Performance Shaders) có sẵn
 if torch.backends.mps.is_available():
     device = torch.device("mps")
-    print("Using MPS device.")
 else:
     device = torch.device("cpu")
-    print("MPS not available. Using CPU.")
 
 # Khởi tạo mô hình YOLO v10
 model = YOLO("../data/yolov10n.pt")

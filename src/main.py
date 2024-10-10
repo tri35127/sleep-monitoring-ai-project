@@ -27,14 +27,12 @@ def process_video_feed():
         # Nhấn "b" để chọn vùng giường cho mỗi người
         key = cv2.waitKey(10) & 0xFF
         if key == ord('b'):
-            print("Selecting bed areas for each person...")
             bed_areas = []  # Tạo danh sách vùng giường mới
             persons = detect_person(frame, None)  # Phát hiện người mà không kiểm tra vùng giường
             for person in persons:
                 bed_area = create_bed_area_from_person_bbox(person)  # Tạo vùng giường từ bounding box của người
                 bed_areas.append(bed_area)
             save_bed_area(bed_areas)  # Lưu danh sách vùng giường vào file config
-            print("Bed areas saved!")
 
         # Vẽ vùng giường nếu đã có
         if bed_areas:
