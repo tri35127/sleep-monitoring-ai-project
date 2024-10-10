@@ -13,10 +13,12 @@ def draw_bounding_boxes(frame, persons):
 # Draw pose skeleton based on keypoints
 def draw_pose(frame, keypoints, offset_x, offset_y):
     for i, keypoint in enumerate(keypoints[0]):
-        if (keypoint[0], keypoint[1]) != (0, 0):  # Check for valid keypoints
+        if (keypoint[0], keypoint[1]) != (0, 0):  # Kiểm tra keypoint hợp lệ
             x, y = int(keypoint[0]) + offset_x, int(keypoint[1]) + offset_y
-            cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)  # Red keypoint
+            cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)  # Vẽ keypoint (đỏ)
 
+            # Hiện số của keypoint
+            cv2.putText(frame, str(i), (x + 5, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
 
 # Initialize or load bed area
 def initialize_bed_area(frame, bed_area):
