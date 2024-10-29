@@ -4,19 +4,20 @@ from alert_system import send_alert
 import torch
 from ultralytics import YOLO
 
-# Check if MPS (Metal Performance Shaders) is available
-if torch.backends.mps.is_available():
-    device = torch.device("mps")
-    print("Using MPS device.")
+# Check if CUDA is available
+if torch.cuda.is_available():
+    device = torch.device("cuda")  # Use CUDA if available
+    print(f"Using GPU: {torch.cuda.get_device_name()}")
+    print(f"cuDNN is enabled: {torch.backends.cudnn.enabled}")
 else:
-    device = torch.device("cpu")  # Fallback to CPU if MPS is not available
-    print("MPS not available. Using CPU.")
-# Load YOLOv8 Pose model
+    device = torch.device("cpu")  # Fallback to CPU if CUDA is not available
+    print("CUDA not available. Using CPU.")
+
+# Load YOLOv Pose model
 model = YOLO("../data/yolo11m-pose.pt")  # Replace with the correct path to your YOLO model
 
-
 def estimate_pose(frame):
-    # Perform inference with YOLO
+    # Perform inference with YOLO on the specified device (GPU or CPU)
     results = model.predict(frame, verbose=False, device=device)
 
     keypoints = []
@@ -26,8 +27,6 @@ def estimate_pose(frame):
     # Use .size to check if the array has elements
     return keypoints if keypoints.size > 0 else None  # Return None if no keypoints detected
 
-
-# Classify posture based on detected keypoints
 # Classify posture based on detected keypoints
 def classify_posture(keypoints):
     if keypoints is None:
@@ -40,18 +39,24 @@ def classify_posture(keypoints):
     for i, keypoint in enumerate(keypoints[0]):
         if i == 1:  # Head (Nose)
             head = keypoint
-        elif i == 2:  # Left Shoulder
+        elif i == 5:  # Left Shoulder
             left_shoulder = keypoint
-        elif i == 3:  # Right Shoulder
+        elif i == 6:  # Right Shoulder
             right_shoulder = keypoint
-        elif i == 4:  # Left Hip
+        elif i == 11:  # Left Hip
             left_hip = keypoint
-        elif i == 5:  # Right Hip
+        elif i == 12:  # Right Hip
             right_hip = keypoint
 
     # Calculate average shoulder and hip positions
     avg_shoulder_y = (left_shoulder[1] + right_shoulder[1]) / 2
     avg_hip_y = (left_hip[1] + right_hip[1]) / 2
+
+    # Prone position check: head is aligned or slightly below shoulders, and hips are horizontally aligned with shoulders
+    head_to_shoulder_dist = abs(head[1] - avg_shoulder_y)
+    if head_to_shoulder_dist < 30 and abs(avg_shoulder_y - avg_hip_y) < 50:
+        send_alert("prone")
+        return "prone"
 
     # Check for sitting (hips below shoulders, significant difference in vertical height)
     if avg_hip_y > avg_shoulder_y and head[1] > avg_shoulder_y:
@@ -62,7 +67,7 @@ def classify_posture(keypoints):
     if head[1] < avg_shoulder_y and avg_shoulder_y > avg_hip_y:
         send_alert("standing")
         return "standing"
-    
+
     send_alert("unknown")
     return "unknown"
 
