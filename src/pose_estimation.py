@@ -9,6 +9,9 @@ if torch.cuda.is_available():
     device = torch.device("cuda")  # Use CUDA if available
     print(f"Using GPU: {torch.cuda.get_device_name()}")
     print(f"cuDNN is enabled: {torch.backends.cudnn.enabled}")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+    print("Using MPS")
 else:
     device = torch.device("cpu")  # Fallback to CPU if CUDA is not available
     print("CUDA not available. Using CPU.")
@@ -51,25 +54,6 @@ def classify_posture(keypoints):
     # Calculate average shoulder and hip positions
     avg_shoulder_y = (left_shoulder[1] + right_shoulder[1]) / 2
     avg_hip_y = (left_hip[1] + right_hip[1]) / 2
-
-    # Prone position check: head is aligned or slightly below shoulders, and hips are horizontally aligned with shoulders
-    head_to_shoulder_dist = abs(head[1] - avg_shoulder_y)
-    if head_to_shoulder_dist < 30 and abs(avg_shoulder_y - avg_hip_y) < 50:
-        send_alert("prone")
-        return "prone"
-
-    # Check for sitting (hips below shoulders, significant difference in vertical height)
-    if avg_hip_y > avg_shoulder_y and head[1] > avg_shoulder_y:
-        send_alert("sitting")
-        return "sitting"
-
-    # Check for standing (shoulders above hips, and head above shoulders)
-    if head[1] < avg_shoulder_y and avg_shoulder_y > avg_hip_y:
-        send_alert("standing")
-        return "standing"
-
-    send_alert("unknown")
-    return "unknown"
 
 def draw_pose(frame, keypoints, offset_x, offset_y):
     for i, keypoint in enumerate(keypoints[0]):
