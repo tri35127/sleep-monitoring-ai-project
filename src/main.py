@@ -1,11 +1,14 @@
 import cv2
 import time
-from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes
+from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes, is_person_outside_bed
+from face_detection import detect_faces, draw_faces
 from pose_estimation import estimate_pose, classify_posture, draw_pose
+from alert_system import send_alert
+
 
 # Main video processing loop
 def process_video_feed():
-    cap = cv2.VideoCapture(0)  # Sử dụng camera
+    cap = cv2.VideoCapture(1)  # Sử dụng camera
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
@@ -39,18 +42,36 @@ def process_video_feed():
             for bed_area in bed_areas:
                 draw_bed_area(frame, bed_area)
 
-        # Phát hiện người và vẽ bounding boxes
+        # Phát hiện người và kiểm tra bất thường
         persons = detect_person(frame, bed_areas)  # Phát hiện người
         for i, person in enumerate(persons):
             x1, y1, x2, y2 = map(int, person)
             person_frame = frame[y1:y2, x1:x2]  # Cắt khung hình theo bounding box của người
-            keypoints = estimate_pose(person_frame)
+
+            # Kiểm tra nếu người ngoài giường
+            if bed_areas:
+                for bed_area in bed_areas:
+                    if is_person_outside_bed(person, bed_area):
+                        send_alert("Cảnh báo: Trẻ đã rời khỏi giường!")
+
+            # Vẽ bounding box cho mỗi người
             draw_bounding_boxes(frame, persons)
-            # Vẽ pose và posture nếu tìm thấy keypoints
-            if keypoints is not None:
-                posture = classify_posture(keypoints)
-                cv2.putText(frame, f"Posture: {posture}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-                draw_pose(frame, keypoints, x1, y1)  # Vẽ pose với offset tọa độ từ bounding box
+
+            # Trong vòng lặp chính của hàm process_video_feed
+            persons = detect_person(frame, bed_areas)  # Phát hiện người
+            for i, person in enumerate(persons):
+                # Phát hiện khuôn mặt trong vùng bounding box của người
+                x1, y1, x2, y2 = map(int, person)
+                person_frame = frame[y1:y2, x1:x2]
+                face_bboxes, _ = detect_faces(person_frame)
+
+                # Vẽ bounding box của khuôn mặt nếu phát hiện thấy
+                frame = draw_faces(frame, face_bboxes)
+
+                # Kiểm tra điều kiện để cảnh báo nếu khuôn mặt bị che hoặc không phát hiện được
+                if not face_bboxes:
+                    send_alert("Cảnh báo: Khuôn mặt bị che hoặc không phát hiện!")
+
 
         # Hiển thị FPS trên khung hình
         cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
@@ -64,6 +85,7 @@ def process_video_feed():
 
     cap.release()
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     process_video_feed()

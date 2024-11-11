@@ -531,3 +531,60 @@
 2024-10-31 09:30:53 - Cảnh báo: Trẻ đang ngồi!
 2024-10-31 09:30:58 - Cảnh báo: Trẻ đang ngồi!
 2024-10-31 09:31:03 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:11:29 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:11:37 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:11:43 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:11:49 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:11:54 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:12:01 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-11-11 11:12:06 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:12:11 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:12:16 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:12:22 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:12:28 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:12:33 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:12:38 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:12:43 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:12:48 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:12:54 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:12:59 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:13:43 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:13:56 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:14:01 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:14:06 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:14:12 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:14:19 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:14:29 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:14:38 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:14:43 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:14:48 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:16:14 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:16:19 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:16:24 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:16:30 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-11-11 11:16:37 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-11-11 11:16:42 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:16:52 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:16:57 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:03 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:12 - Cảnh báo: Trẻ đã rời khỏi giường!
+2024-11-11 11:17:18 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:24 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:29 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:34 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:40 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:45 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:50 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:17:55 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:00 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:05 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:10 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:15 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:21 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:26 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:31 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:36 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:41 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:47 - Cảnh báo: Không phát hiện khuôn mặt!
+2024-11-11 11:18:53 - Cảnh báo: Trẻ đang ngồi!
+2024-11-11 11:26:49 - Cảnh báo: Trẻ đang ngồi!
