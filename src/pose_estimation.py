@@ -16,7 +16,7 @@ else:
     print("CUDA không khả dụng. Đang sử dụng CPU.")
 
 # Tải mô hình YOLO Pose
-model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11x-pose.pt")  # Thay thế bằng đường dẫn đúng đến mô hình YOLO của bạn
+model = YOLO("../data/yolo11x-pose.pt")  # Thay thế bằng đường dẫn đúng đến mô hình YOLO của bạn
 
 initial_posture = None  # Theo dõi tư thế ban đầu
 
@@ -87,19 +87,6 @@ def draw_pose(frame, keypoints, offset_x=0, offset_y=0):
                 x, y = int(keypoint[0]) + offset_x, int(keypoint[1]) + offset_y
                 cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)  # Vẽ keypoint (màu đỏ)
                 cv2.putText(frame, str(i), (x + 5, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
-
-def prone_alert(frame):
-    keypoints = estimate_pose(frame)
-    current_posture = classify_posture(keypoints)
-
-    if current_posture == "prone":
-        # Nếu phát hiện tư thế nằm sấp, gửi thông báo
-        send_alert("Tư thế nằm sấp phát hiện!")
-
-    if has_posture_changed(current_posture):
-        send_alert(f"Tư thế đã thay đổi thành: {current_posture}")
-
-    draw_pose(frame, keypoints)
 
 
 

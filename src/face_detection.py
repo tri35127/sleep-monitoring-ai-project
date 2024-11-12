@@ -4,7 +4,7 @@ import face_recognition
 from alert_system import send_alert
 
 # Hàm phát hiện khuôn mặt và kiểm tra xem mặt có bị che hay không
-def detect_face(frame, upsample=1, model="hog"):
+def detect_face(frame, upsample=1, model="cnn"):
     # Chuyển khung hình từ OpenCV (BGR) sang RGB cho thư viện face_recognition
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -20,10 +20,8 @@ def detect_face(frame, upsample=1, model="hog"):
             else:
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
                 cv2.putText(frame, "Face Detected", (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-    else:
-        send_alert("Cảnh báo: Không phát hiện khuôn mặt!")
-
-    return frame
+                return frame
+    return None
 
 # Hàm kiểm tra xem khuôn mặt có bị che không
 def is_face_obstructed(face_frame, obstruction_threshold=0.5):
