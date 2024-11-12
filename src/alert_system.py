@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 last_alert_time = None
 
 # Minimum time between alerts (10 seconds)
-ALERT_INTERVAL = timedelta(seconds=5)
+ALERT_INTERVAL = timedelta(seconds=30)
 
 # Display alert by printing to the console
 def show_alert(message):

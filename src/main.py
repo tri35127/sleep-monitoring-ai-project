@@ -1,14 +1,14 @@
 import cv2
 import time
 from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes, is_person_outside_bed
-from face_detection import detect_faces, draw_faces
+from face_detection import detect_face
 from pose_estimation import estimate_pose, classify_posture, draw_pose
 from alert_system import send_alert
 
 
 # Main video processing loop
 def process_video_feed():
-    cap = cv2.VideoCapture(1)  # Sử dụng camera
+    cap = cv2.VideoCapture(0)  # Sử dụng camera
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
@@ -57,21 +57,18 @@ def process_video_feed():
             # Vẽ bounding box cho mỗi người
             draw_bounding_boxes(frame, persons)
 
-            # Trong vòng lặp chính của hàm process_video_feed
-            persons = detect_person(frame, bed_areas)  # Phát hiện người
-            for i, person in enumerate(persons):
-                # Phát hiện khuôn mặt trong vùng bounding box của người
-                x1, y1, x2, y2 = map(int, person)
-                person_frame = frame[y1:y2, x1:x2]
-                face_bboxes, _ = detect_faces(person_frame)
-
-                # Vẽ bounding box của khuôn mặt nếu phát hiện thấy
-                frame = draw_faces(frame, face_bboxes)
-
-                # Kiểm tra điều kiện để cảnh báo nếu khuôn mặt bị che hoặc không phát hiện được
-                if not face_bboxes:
-                    send_alert("Cảnh báo: Khuôn mặt bị che hoặc không phát hiện!")
-
+            # Phát hiện khuôn mặt trong bounding box của người
+            x1, y1, x2, y2 = map(int, person)
+            person_frame = frame[y1:y2, x1:x2]  # Cắt khung hình theo bounding box của người
+            detect_face(person_frame)  # Phát hiện mặt
+            # Phát hiện khung xương trong vùng bounding box của người
+            keypoints = estimate_pose(person_frame)
+            if keypoints is not None:
+                posture = classify_posture(keypoints)
+                if posture == "abnormal":
+                    send_alert("Cảnh báo: Tư thế không bình thường!")
+                else:
+                    draw_pose(frame, keypoints, x1, y1)  # Vẽ pose với offset tọa độ từ bounding box
 
         # Hiển thị FPS trên khung hình
         cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
