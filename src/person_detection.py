@@ -17,8 +17,8 @@ else:
     print("CUDA not available. Using CPU.")
 
 # Khởi tạo mô hình YOLO v10
-model = YOLO("../data/yolov10n.pt")
-CONFIG_FILE = "config/bed_config.json"
+model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11m-seg.pt")
+CONFIG_FILE = "D:/sleep-monitoring-ai-project/src/config/config.json"
 
 # Vẽ bounding box cho mỗi người
 def draw_bounding_boxes(frame, persons):

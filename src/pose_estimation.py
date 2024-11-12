@@ -56,7 +56,7 @@ def classify_posture(keypoints):
         left_hip.size > 0 and right_hip.size > 0):
         
         # Nếu vai trái ở bên phải vai phải và hông trái ở bên phải hông phải,
-        # điều này có thể chỉ ra tư thế nằm ngửa (supine).
+        # Chỉ ra tư thế nằm ngửa (supine).
         if left_shoulder[0] > right_shoulder[0] and left_hip[0] > right_hip[0]:
             return "supine"
         
@@ -97,7 +97,7 @@ def prone_alert(frame):
         send_alert("Tư thế nằm sấp phát hiện!")
 
     if has_posture_changed(current_posture):
-        print(f"Tư thế đã thay đổi thành: {current_posture}")
+        send_alert(f"Tư thế đã thay đổi thành: {current_posture}")
 
     draw_pose(frame, keypoints)
 

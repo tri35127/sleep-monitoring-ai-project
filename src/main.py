@@ -65,10 +65,11 @@ def process_video_feed():
             keypoints = estimate_pose(person_frame)
             if keypoints is not None:
                 posture = classify_posture(keypoints)
-                if posture == "abnormal":
-                    send_alert("Cảnh báo: Tư thế không bình thường!")
-                else:
-                    draw_pose(frame, keypoints, x1, y1)  # Vẽ pose với offset tọa độ từ bounding box
+                print(posture)
+                draw_pose(frame, keypoints, x1, y1)  # Vẽ pose với offset tọa độ từ bounding box
+                if posture == "prone":
+                # Nếu phát hiện tư thế nằm sấp, gửi thông báo
+                    send_alert("Tư thế nằm sấp phát hiện!")
 
         # Hiển thị FPS trên khung hình
         cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
