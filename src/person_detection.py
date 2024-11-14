@@ -4,21 +4,13 @@ from ultralytics import YOLO
 from alert_system import send_alert
 import torch
 
-# Kiểm tra và chọn thiết bị
-if torch.cuda.is_available():
-    device = torch.device("cuda")  # Dùng CUDA nếu có
-    print(f"Using GPU: {torch.cuda.get_device_name()}")
-    print(f"cuDNN is enabled: {torch.backends.cudnn.enabled}")
-elif torch.backends.mps.is_available():
-    device = torch.device("mps")  # Dùng MPS nếu có
-    print("Using MPS")
-else:
-    device = torch.device("cpu")  # Sử dụng CPU nếu không có CUDA hoặc MPS
-    print("CUDA not available. Using CPU.")
+device = torch.device("cuda:0")  # Set the device to GPU
+model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
+model.export(format="onnx")
+# Load the exported ONNX model
+onnx_model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.onnx")
+CONFIG_FILE = "D:/sleep-monitoring-ai-project/config/config.json"
 
-# Khởi tạo mô hình YOLO v10
-model = YOLO("../data/yolo11x-pose.pt")
-CONFIG_FILE = "../config/config.json"
 
 # Vẽ bounding box cho mỗi người
 def draw_bounding_boxes(frame, persons):
@@ -119,7 +111,7 @@ def is_sitting(person_bbox, bed_area, overlap_threshold=0.5, aspect_ratio_thresh
 
 # Phát hiện người và cảnh báo khi người ở ngoài giường hoặc đang ngồi
 def detect_person(frame, bed_areas=None):
-    results = model(frame, verbose=False, device=device, imgsz=320)
+    results = model(frame, verbose=False, imgsz=320, device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     persons = []
 
     for result in results:

@@ -1,17 +1,13 @@
 import cv2
 import time
 from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes, is_person_outside_bed
-from face_detection import detect_face, is_face_obstructed
 from pose_estimation import estimate_pose, classify_posture, draw_pose
 from alert_system import send_alert
 
 
 # Main video processing loop
 def process_video_feed():
-    cap = cv2.VideoCapture(1)  # Sử dụng camera
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-
+    cap = cv2.VideoCapture(0)  # Sử dụng camera
     bed_areas = load_bed_area()  # Load danh sách vùng giường từ file config
     prev_frame_time = 0  # Biến lưu thời gian của frame trước
 
@@ -59,22 +55,15 @@ def process_video_feed():
                         # Phát hiện khuôn mặt trong bounding box của người
                         x1, y1, x2, y2 = map(int, person)
                         person_frame = frame[y1:y2, x1:x2]  # Cắt khung hình theo bounding box của người
-                        face=detect_face(person_frame)  # Phát hiện mặt
-                        if face is None:
-                            send_alert("Cảnh báo: Không phát hiện khuôn mặt!")
-                        else:
-                            # Nếu có khuôn mặt, tiến hành phát hiện khung xương
-                            keypoints = estimate_pose(person_frame)
+                        # Nếu có khuôn mặt, tiến hành phát hiện khung xương
+                        keypoints = estimate_pose(person_frame)
+                        if keypoints is not None:
+                            posture = classify_posture(keypoints)
+                            draw_pose(frame, keypoints, x1, y1)
 
-                            if keypoints is not None:
-                                posture = classify_posture(keypoints)
-                                draw_pose(frame, keypoints, x1, y1)
-
-                                # Nếu phát hiện tư thế nằm sấp, gửi thông báo
-                                if posture == "prone":
-                                    send_alert("Cảnh báo: Tư thế nằm sấp phát hiện!")
-                            else:
-                                send_alert("Cảnh báo: Không phát hiện được khung xương!")
+                            # Nếu phát hiện tư thế nằm sấp, gửi thông báo
+                            if posture == "prone":
+                                send_alert("Cảnh báo: Tư thế nằm sấp phát hiện!")
 
         # Hiển thị FPS trên khung hình
         cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)

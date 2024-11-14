@@ -1,6 +1,4 @@
 import torch
-
-if torch.backends.mps.is_available():
-    print("MPS backend is available.")
-else:
-    print("MPS backend is not available.")
+print("CUDA available:", torch.cuda.is_available())
+print("CUDA device count:", torch.cuda.device_count())
+print("Current device:", torch.cuda.current_device() if torch.cuda.is_available() else "No GPU available")
