@@ -1,7 +1,7 @@
 import cv2
 import time
-from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes, is_person_outside_bed
-from pose_estimation import estimate_pose, classify_posture, draw_pose
+from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes, person_alert
+from keypoint import estimate_pose, classify_posture, draw_pose
 from alert_system import send_alert
 
 
@@ -33,37 +33,33 @@ def process_video_feed():
                 bed_areas.append(bed_area)
             save_bed_area(bed_areas)  # Lưu danh sách vùng giường vào file config
 
-        # Vẽ vùng giường nếu đã có
+    # Vẽ vùng giường nếu đã
         if bed_areas:
             for bed_area in bed_areas:
                 draw_bed_area(frame, bed_area)
 
         # Phát hiện người và kiểm tra bất thường
-        persons = detect_person(frame, bed_areas)  # Phát hiện người
+        persons = detect_person(frame)  # Phát hiện người
+        draw_bounding_boxes(frame, persons)
         for i, person in enumerate(persons):
-            x1, y1, x2, y2 = map(int, person)
-            person_frame = frame[y1:y2, x1:x2]  # Cắt khung hình theo bounding box của người
-
+            p_alert = person_alert(persons, bed_areas)
             # Kiểm tra nếu người ngoài giường
-            if bed_areas:
-                for bed_area in bed_areas:
-                    if is_person_outside_bed(person, bed_area):
-                        send_alert("Cảnh báo: Trẻ đã rời khỏi giường!")
-                    else:
-                        # Vẽ bounding box cho mỗi người
-                        draw_bounding_boxes(frame, persons)
-                        # Phát hiện khuôn mặt trong bounding box của người
-                        x1, y1, x2, y2 = map(int, person)
-                        person_frame = frame[y1:y2, x1:x2]  # Cắt khung hình theo bounding box của người
-                        # Nếu có khuôn mặt, tiến hành phát hiện khung xương
-                        keypoints = estimate_pose(person_frame)
-                        if keypoints is not None:
-                            posture = classify_posture(keypoints)
-                            draw_pose(frame, keypoints, x1, y1)
-
-                            # Nếu phát hiện tư thế nằm sấp, gửi thông báo
-                            if posture == "prone":
-                                send_alert("Cảnh báo: Tư thế nằm sấp phát hiện!")
+            if p_alert == "Cảnh báo: Trẻ đã rời khỏi giường!":
+                send_alert("Cảnh báo: Trẻ đã rời khỏi giường!")
+            else:
+                if p_alert == "Cảnh báo: Trẻ đang ngồi!":
+                    send_alert("Cảnh báo: Trẻ đang ngồi!")
+                # Phát hiện khuôn mặt trong bounding box của người
+                x1, y1, x2, y2 = map(int, person)
+                person_frame = frame[y1:y2, x1:x2]  # Cắt khung hình theo bounding box của người
+                # Nếu có khuôn mặt, tiến hành phát hiện khung xương
+                keypoints = estimate_pose(person_frame)
+                if keypoints is not None:
+                    posture = classify_posture(keypoints)
+                    draw_pose(frame, keypoints, x1, y1)
+                    # Nếu phát hiện tư thế nằm sấp, gửi thông báo
+                    if posture == "prone":
+                        send_alert("Cảnh báo: Tư thế nằm sấp phát hiện!")
 
         # Hiển thị FPS trên khung hình
         cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)

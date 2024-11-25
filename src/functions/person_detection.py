@@ -110,7 +110,7 @@ def is_sitting(person_bbox, bed_area, overlap_threshold=0.5, aspect_ratio_thresh
     return overlap_ratio > overlap_threshold and aspect_ratio > aspect_ratio_threshold
 
 # Phát hiện người và cảnh báo khi người ở ngoài giường hoặc đang ngồi
-def detect_person(frame, bed_areas=None):
+def detect_person(frame):
     results = model(frame, verbose=False, imgsz=320, device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     persons = []
 
@@ -120,13 +120,15 @@ def detect_person(frame, bed_areas=None):
             if class_id == 0:  # 0 là nhãn của "người"
                 bbox = detection.xyxy[0].cpu().numpy()
                 persons.append(bbox)
-
-                # Kiểm tra nếu có vùng giường và phát cảnh báo
-                if bed_areas:
-                    for bed_area in bed_areas:
-                        if is_person_outside_bed(bbox, bed_area):
-                            send_alert("Cảnh báo: Trẻ đã rời khỏi giường!")
-                        elif is_sitting(bbox, bed_area):
-                            send_alert("Cảnh báo: Trẻ đang ngồi!")
-
     return persons
+
+def person_alert (bbox, bed_areas):
+    # Kiểm tra nếu có vùng giường và phát cảnh báo
+    if bed_areas:
+        for bed_area in bed_areas:
+            if is_person_outside_bed(bbox, bed_area):
+                return "Cảnh báo: Trẻ đã rời khỏi giường!"
+            elif is_sitting(bbox, bed_area):
+                return "Cảnh báo: Trẻ đang ngồi!"
+            else:
+                return "Trẻ trong giường"
