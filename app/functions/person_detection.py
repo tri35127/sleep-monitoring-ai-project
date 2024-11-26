@@ -4,12 +4,20 @@ from ultralytics import YOLO
 from alert_system import send_alert
 import torch
 
+import os
+import configparser
+# Construct the relative path to config.ini
+config_path = os.path.realpath("../config/config.ini")
+# Create a configuration object
+config = configparser.ConfigParser()
+config.read(config_path)
+
 device = torch.device("cuda:0")  # Set the device to GPU
 model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
 model.export(format="onnx")
 # Load the exported ONNX model
 onnx_model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.onnx")
-CONFIG_FILE = "D:/sleep-monitoring-ai-project/config/config.json"
+bed_config = "app/config/bed.json"
 
 
 # Vẽ bounding box cho mỗi người
@@ -21,14 +29,14 @@ def draw_bounding_boxes(frame, persons):
 # Đọc danh sách vùng giường từ file config
 def load_bed_area():
     try:
-        with open(CONFIG_FILE, "r") as f:
+        with open(bed_config, "r") as f:
             return json.load(f)["bed_areas"]
     except FileNotFoundError:
         return None
 
 # Lưu danh sách vùng giường vào file config
 def save_bed_area(bed_areas):
-    with open(CONFIG_FILE, "w") as f:
+    with open(bed_config, "w") as f:
         json.dump({"bed_areas": bed_areas}, f)
 
 # Vẽ bounding box cho vùng giường

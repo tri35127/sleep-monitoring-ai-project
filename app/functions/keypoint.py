@@ -3,6 +3,15 @@ import numpy as np
 from alert_system import send_alert  # Make sure this module is available
 import torch
 from ultralytics import YOLO
+
+import os
+import configparser
+# Construct the relative path to config.ini
+config_path = os.path.realpath("../config/config.ini")
+# Create a configuration object
+config = configparser.ConfigParser()
+config.read(config_path)
+
 # Load YOLO Pose model
 device = torch.device("cuda:0")  # Set the device to GPU
 model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11m-pose.pt").to(device)

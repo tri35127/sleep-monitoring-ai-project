@@ -1,5 +1,13 @@
 from datetime import datetime, timedelta
 
+import os
+import configparser
+# Construct the relative path to config.ini
+config_path = os.path.realpath("../config/config.ini")
+# Create a configuration object
+config = configparser.ConfigParser()
+config.read(config_path)
+
 # Variable to store the last alert time
 last_alert_time = None
 
@@ -27,17 +35,13 @@ def can_send_alert():
     return False
 
 # Main function to send alerts
+alerts_count = 0  # Thêm biến này vào alert_system.py
+
 def send_alert(message):
-    global last_alert_time  # Use global variable to update the time
-    # Only send alert if enough time has passed (10 seconds)
+    global last_alert_time, alerts_count
     if can_send_alert():
-        # Print the message to the console
         show_alert(message)
-
-        # Log each alert
         log_alert(message)
-
-        # Update the last alert time
         last_alert_time = datetime.now()
-    # else:  # No need for an explicit 'else' if you're just passing
-    #     pass
+        alerts_count += 1  # Tăng số lượng cảnh báo
+
