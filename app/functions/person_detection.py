@@ -3,7 +3,7 @@ import json
 from ultralytics import YOLO
 import torch
 
-device = torch.device("cuda:0")  # Set the device to GPU
+device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
 model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
 model.export(format="onnx")
 # Load the exported ONNX model

@@ -13,7 +13,7 @@ config = configparser.ConfigParser()
 config.read(config_path)
 
 # Load YOLO Pose model
-device = torch.device("cuda:0")  # Set the device to GPU
+device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
 model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11m-pose.pt").to(device)
 # Export the model to ONNX format
 model.export(format="onnx")
@@ -101,7 +101,7 @@ def draw_pose(frame, keypoints, offset_x=0, offset_y=0):
         
         # Check if face is covered and alert if true
         if is_face_covered(keypoints):
-            send_alert("Khuôn mặt bị che!")  # Replace with your alert mechanism
+            send_alert("Canh bao tre bi che mat!")  # Replace with your alert mechanism
     return frame
 
 
