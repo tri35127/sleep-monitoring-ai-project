@@ -3,7 +3,7 @@ import threading
 import os
 import cv2
 from combine import process_video_feed
-from alert_system import send_alert
+from alert_system import send_alert, display_alert_statistics
 app = Flask(__name__)
 
 # Biến toàn cục
@@ -29,7 +29,7 @@ def checkcam_source():
                 break
             try:
                 # Xử lý khung hình qua combine.py
-                processed_frame = process_video_feed(frame)
+                processed_frame = process_video_feed()
                 _, buffer = cv2.imencode('.jpg', processed_frame)
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
@@ -122,19 +122,17 @@ def replay_viewstats():
     global alerts_count
     return jsonify({
         "stats": {
-            "alerts_count": alerts_count,
-            "postures": {"lying": 0, "sitting": 0, "standing": 0}  # Cập nhật theo nhu cầu
+            "alerts_count": alerts_count}  # Cập nhật theo nhu cầu
         }
-    })
+    )
 
 
 ### Phần ViewStats ###
 @app.route("/viewstats", methods=["GET"])
 def viewstats():
     """Xem tổng hợp thống kê hệ thống."""
-    global alerts_count
-    return jsonify({"alerts_count": alerts_count})
+    return jsonify({"alerts_count": display_alert_statistics()})
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=False)

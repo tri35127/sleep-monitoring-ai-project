@@ -1,23 +1,14 @@
 import cv2
 import json
 from ultralytics import YOLO
-from alert_system import send_alert
 import torch
-
-import os
-import configparser
-# Construct the relative path to config.ini
-config_path = os.path.realpath("../config/config.ini")
-# Create a configuration object
-config = configparser.ConfigParser()
-config.read(config_path)
 
 device = torch.device("cuda:0")  # Set the device to GPU
 model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
 model.export(format="onnx")
 # Load the exported ONNX model
 onnx_model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.onnx")
-bed_config = "app/config/bed.json"
+CONFIG_FILE = "D:/sleep-monitoring-ai-project/app/config/bed.json"
 
 
 # Vẽ bounding box cho mỗi người
@@ -29,14 +20,14 @@ def draw_bounding_boxes(frame, persons):
 # Đọc danh sách vùng giường từ file config
 def load_bed_area():
     try:
-        with open(bed_config, "r") as f:
+        with open(CONFIG_FILE, "r") as f:
             return json.load(f)["bed_areas"]
     except FileNotFoundError:
         return None
 
 # Lưu danh sách vùng giường vào file config
 def save_bed_area(bed_areas):
-    with open(bed_config, "w") as f:
+    with open(CONFIG_FILE, "w") as f:
         json.dump({"bed_areas": bed_areas}, f)
 
 # Vẽ bounding box cho vùng giường
@@ -81,7 +72,7 @@ def calculate_intersection_area(person_bbox, bed_area):
     return calculate_area(inter_x1, inter_y1, inter_x2, inter_y2)
 
 # Kiểm tra nếu người ở ngoài vùng giường
-def is_person_outside_bed(person_bbox, bed_area, threshold=0.5):
+def is_person_outside_bed(person_bbox, bed_area, threshold=0.3):
     person_area = calculate_area(*map(int, person_bbox))
     intersection_area = calculate_intersection_area(person_bbox, bed_area)
 
@@ -92,7 +83,7 @@ def is_person_outside_bed(person_bbox, bed_area, threshold=0.5):
     return False
 
 # Kiểm tra trạng thái ngồi dựa trên giao nhau 90 độ và box gần vuông
-def is_sitting(person_bbox, bed_area, overlap_threshold=0.5, aspect_ratio_threshold=0.9):
+def is_sitting(person_bbox, bed_area, overlap_threshold=0.4, aspect_ratio_threshold=0.7):
     p_x1, p_y1, p_x2, p_y2 = map(int, person_bbox)
     b_x1, b_y1, b_x2, b_y2 = bed_area
 
@@ -118,7 +109,7 @@ def is_sitting(person_bbox, bed_area, overlap_threshold=0.5, aspect_ratio_thresh
     return overlap_ratio > overlap_threshold and aspect_ratio > aspect_ratio_threshold
 
 # Phát hiện người và cảnh báo khi người ở ngoài giường hoặc đang ngồi
-def detect_person(frame):
+def detect_person(frame, bed_areas=None):
     results = model(frame, verbose=False, imgsz=320, device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     persons = []
 
@@ -129,14 +120,3 @@ def detect_person(frame):
                 bbox = detection.xyxy[0].cpu().numpy()
                 persons.append(bbox)
     return persons
-
-def person_alert (bbox, bed_areas):
-    # Kiểm tra nếu có vùng giường và phát cảnh báo
-    if bed_areas:
-        for bed_area in bed_areas:
-            if is_person_outside_bed(bbox, bed_area):
-                return "Cảnh báo: Trẻ đã rời khỏi giường!"
-            elif is_sitting(bbox, bed_area):
-                return "Cảnh báo: Trẻ đang ngồi!"
-            else:
-                return "Trẻ trong giường"

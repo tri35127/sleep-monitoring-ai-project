@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-
+from collections import Counter, defaultdict
 import os
 import configparser
 # Construct the relative path to config.ini
@@ -10,7 +10,7 @@ config.read(config_path)
 
 # Variable to store the last alert time
 last_alert_time = None
-
+alert_counter = Counter()
 # Minimum time between alerts (10 seconds)
 ALERT_INTERVAL = timedelta(seconds=10)
 
@@ -37,11 +37,21 @@ def can_send_alert():
 # Main function to send alerts
 alerts_count = 0  # Thêm biến này vào alert_system.py
 
+# Main function to send alerts
 def send_alert(message):
     global last_alert_time, alerts_count
     if can_send_alert():
         show_alert(message)
         log_alert(message)
         last_alert_time = datetime.now()
-        alerts_count += 1  # Tăng số lượng cảnh báo
+        alerts_count += 1  # Tăng tổng số lượng cảnh báo
+        alert_counter[message] += 1  # Tăng số lượng cho loại cảnh báo này
 
+
+# Hàm hiển thị thống kê cảnh báo
+def display_alert_statistics():
+    """Hiển thị thống kê số lượng và loại cảnh báo."""
+    print("Alert Statistics:")
+    for alert_type, count in alert_counter.items():
+        print(f"  {alert_type}: {count}")
+    return alert_counter
