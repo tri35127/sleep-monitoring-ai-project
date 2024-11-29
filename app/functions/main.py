@@ -2,44 +2,34 @@ from flask import Flask, jsonify, Response, request
 import threading
 import os
 import cv2
+import queue
+import time
 from combine import process_video_feed
 from alert_system import send_alert, display_alert_statistics
 app = Flask(__name__)
+
+event_queue = queue.Queue()  # Queue để lưu trữ các sự kiện cần gửi
 
 # Biến toàn cục
 camera_status = {"is_active": False, "camera_id": 0}
 recorded_videos = []  # Danh sách video đã quay
 alerts_count = 0  # Biến lưu số lượng cảnh báo
-
-
-### Phần CheckCam ###
-@app.route("/checkcam/source", methods=["GET"])
-def checkcam_source():
-    """Phát luồng camera và xử lý AI từ combine.py."""
-    camera_id = camera_status["camera_id"]
-    cap = cv2.VideoCapture(camera_id)
-
-    if not cap.isOpened():
-        return jsonify({"error": "Camera not available"}), 400
-
+@app.route('/checkcam/source', methods=['GET'])
+def video_feed():
+    cap = cv2.VideoCapture(0)
     def generate_frames():
         while True:
-            ret, frame = cap.read()
-            if not ret:
+            success, frame = process_video_feed(cap)
+            if not success:
                 break
-            try:
-                # Xử lý khung hình qua combine.py
-                processed_frame = process_video_feed()
-                _, buffer = cv2.imencode('.jpg', processed_frame)
-                frame = buffer.tobytes()
+            else:
+                # Mã hóa khung hình thành JPEG
+                _, buffer = cv2.imencode('.jpg', frame)
+                # Truyền dữ liệu khung hình
                 yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            except Exception as e:
-                print(f"Error in video processing: {e}")
-                break
+                       b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 
 @app.route("/checkcam/alert", methods=["GET"])
 def checkcam_alert():
@@ -128,11 +118,27 @@ def replay_viewstats():
 
 
 ### Phần ViewStats ###
-@app.route("/viewstats", methods=["GET"])
-def viewstats():
-    """Xem tổng hợp thống kê hệ thống."""
-    return jsonify({"alerts_count": display_alert_statistics()})
 
+# Background task để cập nhật dữ liệu vào queue
+def push_updates_to_queue():
+    while True:
+        stats = display_alert_statistics()
+        event_queue.put(f"data: {stats}\n\n")  # Định dạng dữ liệu theo SSE
+        time.sleep(5)  # Cập nhật mỗi 5 giây
+
+# Endpoint SSE để gửi dữ liệu realtime
+@app.route('/viewstats', methods=['GET'])
+def viewstats():
+    def event_stream():
+        while True:
+            # Lấy sự kiện từ queue và gửi đến client
+            event = event_queue.get()
+            yield event
+
+    return Response(event_stream(), content_type='text/event-stream')
+
+# Khởi chạy background task
+threading.Thread(target=push_updates_to_queue, daemon=True).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=False)

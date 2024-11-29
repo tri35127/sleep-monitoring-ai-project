@@ -16,9 +16,6 @@ config.read(config_path)
 device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
 model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11m-pose.pt").to(device)
 # Export the model to ONNX format
-model.export(format="onnx")
-# Load the exported ONNX model
-onnx_model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11m-pose.onnx")
 initial_posture = None  # Theo dõi tư thế ban đầu
 
 def estimate_pose(frame):
