@@ -7,6 +7,7 @@ from person_detection import detect_person, draw_bed_area, load_bed_area, create
 from keypoint import estimate_pose, classify_posture, draw_pose
 from alert_system import send_alert, display_alert_statistics
 import numpy as np
+from database.database
 # Biến lưu các metric
 fps_list = []
 response_times = []
@@ -29,8 +30,7 @@ def get_gpu_usage():
         print("Unable to retrieve GPU information:", e)
         return None, None
 
-def process_video_feed():
-    cap = cv2.VideoCapture(0)
+def process_video_feed(cap):
     bed_areas = load_bed_area()
     prev_frame_time = 0
 
@@ -53,10 +53,10 @@ def process_video_feed():
         memory_usages.append(psutil.virtual_memory().percent)
 
         # Lấy thông số GPU nếu có
-        gpu_util, gpu_mem = get_gpu_usage()
-        if gpu_util is not None:
-            gpu_usages.append(gpu_util)
-            gpu_memory_usages.append(gpu_mem)
+        #gpu_util, gpu_mem = get_gpu_usage()
+        #if gpu_util is not None:
+        #    gpu_usages.append(gpu_util)
+        #    gpu_memory_usages.append(gpu_mem)
 
         key = cv2.waitKey(10) & 0xFF
         if key == ord('b'):
@@ -97,15 +97,16 @@ def process_video_feed():
         response_times.append(response_time)
 
         cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        cv2.imshow("Monitoring System", frame)
-
+        #cv2.imshow("Monitoring System", frame)
+        #cv2.waitKey(0)
         if key == ord('q'):
             break
-
+        return ret, frame
     cap.release()
     cv2.destroyAllWindows()
+
     # Vẽ biểu đồ các thông số
-    plot_performance_metrics(fps_list, response_times, cpu_usages, memory_usages, gpu_usages, gpu_memory_usages)
+    #plot_performance_metrics(fps_list, response_times, cpu_usages, memory_usages, gpu_usages, gpu_memory_usages)
 
 def plot_performance_metrics(fps, response_times, cpu, memory, gpu, gpu_memory, fps_avg=30):
     skip_frames = int(0.75 * fps_avg)  # Số khung hình bỏ qua để tương ứng với 0.75 giây
@@ -205,4 +206,4 @@ def display_performance_statistics(fps_list, response_times, cpu_usages, memory_
 if __name__ == "__main__":
     process_video_feed()
     display_alert_statistics()
-    display_performance_statistics(fps_list, response_times, cpu_usages, memory_usages, gpu_usages, gpu_memory_usages)
+    #display_performance_statistics(fps_list, response_times, cpu_usages, memory_usages, gpu_usages, gpu_memory_usages)

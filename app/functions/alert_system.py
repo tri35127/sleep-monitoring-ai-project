@@ -19,7 +19,7 @@ def show_alert(message):
     print(f"ALERT: {message}")
 
 # Log alert to a file
-def log_alert(message, log_file="alert_log.txt"):
+def log_alert(message, log_file="/Users/macbookairm1/Desktop/FPT/Capstone/sleep-monitoring-ai-project/alert_log.txt"):
     with open(log_file, "a", encoding="utf-8") as f:
         time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"{time_now} - {message}\n")
