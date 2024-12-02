@@ -7,7 +7,6 @@ from person_detection import detect_person, draw_bed_area, load_bed_area, create
 from keypoint import estimate_pose, classify_posture, draw_pose
 from alert_system import send_alert, display_alert_statistics
 import numpy as np
-from database.database
 # Biến lưu các metric
 fps_list = []
 response_times = []
@@ -33,7 +32,6 @@ def get_gpu_usage():
 def process_video_feed(cap):
     bed_areas = load_bed_area()
     prev_frame_time = 0
-
     while cap.isOpened():
         start_time = time.time()  # Bắt đầu đếm thời gian xử lý frame
         ret, frame = cap.read()

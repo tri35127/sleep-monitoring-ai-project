@@ -5,7 +5,7 @@ import torch
 
 device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
 model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
-CONFIG_FILE = "/Users/macbookairm1/Desktop/FPT/Capstone/sleep-monitoring-ai-project/app/config/bed.json"
+CONFIG_FILE = "D:/sleep-monitoring-ai-project/app/config/bed.json"
 
 
 # Vẽ bounding box cho mỗi người

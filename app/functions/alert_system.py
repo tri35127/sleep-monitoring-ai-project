@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from collections import Counter, defaultdict
 import os
 import configparser
+from database import Database
 # Construct the relative path to config.ini
 config_path = os.path.realpath("../config/config.ini")
 # Create a configuration object
@@ -18,13 +19,11 @@ ALERT_INTERVAL = timedelta(seconds=10)
 def show_alert(message):
     print(f"ALERT: {message}")
 
-# Log alert to a file
-def log_alert(message, log_file="/Users/macbookairm1/Desktop/FPT/Capstone/sleep-monitoring-ai-project/alert_log.txt"):
-    with open(log_file, "a", encoding="utf-8") as f:
-        time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"{time_now} - {message}\n")
-    print(f"Logged alert: {message}")
-
+def alert_to_db(message):
+    db = Database()
+    time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    db.insert_alert_to_db(time_now, message)
+    db.close_connection()
 # Function to check if enough time has passed between alerts
 def can_send_alert():
     global last_alert_time
@@ -42,7 +41,7 @@ def send_alert(message):
     global last_alert_time, alerts_count
     if can_send_alert():
         show_alert(message)
-        log_alert(message)
+        alert_to_db(message)
         last_alert_time = datetime.now()
         alerts_count += 1  # Tăng tổng số lượng cảnh báo
         alert_counter[message] += 1  # Tăng số lượng cho loại cảnh báo này
