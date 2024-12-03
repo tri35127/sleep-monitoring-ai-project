@@ -3,9 +3,10 @@ import threading
 import os
 import cv2
 import queue
+from datetime import datetime
 import time
 from combine import process_video_feed
-from alert_system import send_alert, display_alert_statistics
+from alert_system import display_last_alert
 app = Flask(__name__)
 
 event_queue = queue.Queue()  # Queue để lưu trữ các sự kiện cần gửi
@@ -116,15 +117,15 @@ def replay_viewstats():
         }
     )
 
-
 ### Phần ViewStats ###
 
-# Background task để cập nhật dữ liệu vào queue
+# Background task để cập nhật dữ liệu vào queue 
 def push_updates_to_queue():
     while True:
-        stats = display_alert_statistics()
-        event_queue.put(f"data: {stats}\n\n")  # Định dạng dữ liệu theo SSE
-        time.sleep(5)  # Cập nhật mỗi 5 giây
+        stats = display_last_alert()
+        time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        event_queue.put(f" {time_now}-{stats}\n\n") # Định dạng dữ liệu th 
+        time.sleep(5) # Cập nhật mỗi 5 giây
 
 # Endpoint SSE để gửi dữ liệu realtime
 @app.route('/viewstats', methods=['GET'])

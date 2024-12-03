@@ -4,8 +4,8 @@ from ultralytics import YOLO
 import torch
 
 device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
-model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
-CONFIG_FILE = "/Users/macbookairm1/Desktop/FPT/Capstone/sleep-monitoring-ai-project/app/config/bed.json"
+model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11x.pt").to(device)
+CONFIG_FILE = "D:/sleep-monitoring-ai-project/app/config/bed.json"
 
 
 # Vẽ bounding box cho mỗi người
@@ -33,7 +33,7 @@ def draw_bed_area(frame, bed_area):
     cv2.rectangle(frame, (bed_x1, bed_y1), (bed_x2, bed_y2), (255, 0, 0), 2)  # Xanh dương
 
 # Tạo vùng giường từ bounding box của người, với tỉ lệ phóng to 1.05x
-def create_bed_area_from_person_bbox(bbox, scale_factor=1.05):
+def create_bed_area_from_person_bbox(bbox, scale_factor=1.15):
     x1, y1, x2, y2 = map(int, bbox)
     width = x2 - x1
     height = y2 - y1
@@ -68,8 +68,8 @@ def calculate_intersection_area(person_bbox, bed_area):
     # Tính diện tích giao nhau
     return calculate_area(inter_x1, inter_y1, inter_x2, inter_y2)
 
-# Kiểm tra nếu người ở ngoài vùng giường
-def is_person_outside_bed(person_bbox, bed_area, threshold=0.3):
+# Kiểm tra nếu người ở ngoài vùng giường 
+def is_person_outside_bed(person_bbox, bed_area, threshold=0.42): #threshold càng to, càng dễ thông báo
     person_area = calculate_area(*map(int, person_bbox))
     intersection_area = calculate_intersection_area(person_bbox, bed_area)
 
@@ -80,7 +80,7 @@ def is_person_outside_bed(person_bbox, bed_area, threshold=0.3):
     return False
 
 # Kiểm tra trạng thái ngồi dựa trên giao nhau 90 độ và box gần vuông
-def is_sitting(person_bbox, bed_area, overlap_threshold=0.4, aspect_ratio_threshold=0.7):
+def is_sitting(person_bbox, bed_area, overlap_threshold=0.5, aspect_ratio_threshold=0.35):
     p_x1, p_y1, p_x2, p_y2 = map(int, person_bbox)
     b_x1, b_y1, b_x2, b_y2 = bed_area
 

@@ -1,0 +1,150 @@
+import cv2
+import time
+import psutil
+import subprocess
+import matplotlib.pyplot as plt
+from person_detection import (
+    detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, 
+    save_bed_area, draw_bounding_boxes, is_person_outside_bed, is_sitting
+)
+from keypoint import estimate_pose, classify_posture, draw_pose
+from alert_system import send_alert, display_alert_statistics
+import numpy as np
+
+# Performance metrics
+performance_metrics = {
+    "fps": [],
+    "response_times": [],
+    "cpu_usages": [],
+    "memory_usages": [],
+    "gpu_usages": [],
+    "gpu_memory_usages": []
+}
+
+def get_gpu_usage():
+    """Retrieve GPU usage metrics using `nvidia-smi`."""
+    try:
+        result = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=utilization.gpu,memory.used", "--format=csv,nounits,noheader"],
+            encoding="utf-8"
+        )
+        gpu_util, gpu_mem = map(int, result.strip().split(", "))
+        return gpu_util, gpu_mem
+    except Exception as e:
+        print("Unable to retrieve GPU information:", e)
+        return None, None
+
+def update_performance_metrics(start_time):
+    """Update and store system performance metrics."""
+    # FPS
+    new_frame_time = time.time()
+    fps = 1 / (new_frame_time - start_time)
+    performance_metrics["fps"].append(fps)
+    
+    # System resource usage
+    performance_metrics["cpu_usages"].append(psutil.cpu_percent())
+    performance_metrics["memory_usages"].append(psutil.virtual_memory().percent)
+    gpu_util, gpu_mem = get_gpu_usage()
+    if gpu_util is not None:
+        performance_metrics["gpu_usages"].append(gpu_util)
+        performance_metrics["gpu_memory_usages"].append(gpu_mem)
+
+    return new_frame_time, fps
+
+def draw_metrics(frame, fps):
+    """Display FPS and other information on the frame."""
+    cv2.putText(frame, f"FPS: {int(fps)}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+
+def process_person(frame, person, bed_areas):
+    """Process each detected person, including pose estimation and alert checks."""
+    x1, y1, x2, y2 = map(int, person)
+    person_frame = frame[y1:y2, x1:x2]
+    draw_bounding_boxes(frame, [person])
+
+    for bed_area in bed_areas:
+        if is_sitting(person, bed_area):
+            send_alert("Child is sitting!")
+        elif is_person_outside_bed(person, bed_area):
+            send_alert("Child is outside the bed!")
+        else:
+            keypoints = estimate_pose(person_frame)
+            if keypoints is not None:
+                posture = classify_posture(keypoints)
+                draw_pose(frame, keypoints, x1, y1)
+                if posture == "prone":
+                    send_alert("Child is prone!")
+
+def process_video_feed():
+    #cap = cv2.VideoCapture("rtsp://admin:BDTYDD@192.168.1.103:554")
+    cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
+    bed_areas = load_bed_area() or []
+    prev_frame_time = 0
+
+    while cap.isOpened():
+        start_time = time.time()
+        ret, frame = cap.read()
+        if not ret:
+            print("End of video or error reading frame.")
+            break
+
+        # Handle bed area marking
+        key = cv2.waitKey(10) & 0xFF
+        if key == ord('b'):
+            bed_areas.clear()
+            persons = detect_person(frame, None)
+            for person in persons:
+                bed_areas.append(create_bed_area_from_person_bbox(person))
+            save_bed_area(bed_areas)
+
+        # Draw bed areas
+        for bed_area in bed_areas:
+            draw_bed_area(frame, bed_area)
+
+        # Detect and process persons
+        persons = detect_person(frame, bed_areas)
+        for person in persons:
+            process_person(frame, person, bed_areas)
+
+        # Update and display performance metrics
+        prev_frame_time, fps = update_performance_metrics(prev_frame_time)
+        draw_metrics(frame, fps)
+
+        # Calculate response time
+        response_time = time.time() - start_time
+        performance_metrics["response_times"].append(response_time)
+
+        cv2.imshow("Monitoring System", frame)
+        if key == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+    plot_performance_metrics(performance_metrics)
+
+def plot_performance_metrics(metrics):
+    """Plot performance metrics over time."""
+    plt.figure(figsize=(12, 10))
+    titles = [
+        ("FPS", "fps"), 
+        ("Response Time (s)", "response_times"),
+        ("CPU Usage (%)", "cpu_usages"), 
+        ("Memory Usage (%)", "memory_usages"),
+        ("GPU Usage (%)", "gpu_usages"), 
+        ("GPU Memory Usage (MiB)", "gpu_memory_usages")
+    ]
+
+    for i, (title, key) in enumerate(titles, 1):
+        plt.subplot(3, 2, i)
+        plt.plot(metrics[key], label=title)
+        plt.title(title)
+        plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    process_video_feed()
+    display_alert_statistics()
