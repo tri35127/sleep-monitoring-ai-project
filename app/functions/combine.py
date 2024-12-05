@@ -4,7 +4,7 @@ import psutil
 import subprocess
 import matplotlib.pyplot as plt
 from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes, is_person_outside_bed, is_sitting
-from keypoint import estimate_pose, detect_convulsive_movement, draw_pose
+from keypoint import estimate_pose, detect_poor_sleep_movement, draw_pose
 from alert_system import send_alert, display_alert_statistics
 import numpy as np
 # Biến lưu các metric
@@ -85,7 +85,7 @@ def process_video_feed(cap):
                         keypoints = estimate_pose(person_frame)
                     if keypoints is not None:
                             
-                        if detect_convulsive_movement(keypoints):
+                        if detect_poor_sleep_movement(keypoints):
                             send_alert("Tre ngu khong ngon!")  # Alert for erratic movement
                         draw_pose(frame, keypoints, x1, y1)
 

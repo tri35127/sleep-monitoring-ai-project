@@ -3,7 +3,7 @@ import numpy as np
 from alert_system import send_alert  # Make sure this module is available
 import torch
 from ultralytics import YOLO
-
+from scipy.ndimage import gaussian_filter1d
 import os
 import configparser
 # Construct the relative path to config.ini
@@ -30,10 +30,9 @@ def estimate_pose(frame):
     return keypoints if len(keypoints) > 0 else None  # Return None if no keypoints are detected
     
 
-# Detect convulsive movements based on keypoint motion patterns
-from scipy.ndimage import gaussian_filter1d
+# Detect poor sleep movements based on keypoint motion patterns
 
-def detect_convulsive_movement(keypoints):
+def detect_poor_sleep_movement(keypoints):
     global keypoint_history
 
     if keypoints is None or len(keypoints) == 0:
@@ -75,18 +74,39 @@ def detect_convulsive_movement(keypoints):
 
         # Analyze motion patterns
         sustained_spikes = 0
+        movement_count = 0
+        still_duration = 0
+        movement_clusters = 0
         for motion in velocities:
-            # Convulsion: Sustained high variance and irregular spikes
+            # Movement Intensity & Frequency: High variance in velocity could indicate convulsion
             if np.std(motion) > 3.0 and np.max(motion) > 20.0:  # Adjust thresholds as needed
                 sustained_spikes += 1
+            # Count how many movements are above a certain intensity (e.g., larger than 5 units of velocity)
+            movement_count += sum(1 for v in motion if v > 5.0)
+            # Detect clusters of rapid movement
+            movement_clusters += sum(1 for t in range(1, len(motion)) if motion[t] > 5.0 and motion[t-1] > 5.0)
 
-        # Detect convulsion only if multiple keypoints exhibit sustained spikes
+        # Track Duration of Stillness
+        if sustained_spikes == 0 and movement_count == 0:
+            still_duration += 1
+
+        # Analyze the results based on thresholds
         if sustained_spikes >= 2:  # At least two keypoints show convulsive patterns
-            return True
+            return True  # Convulsion detected
 
-    return False  # No convulsive movement detected
+        # Check for restlessness: frequent movements within a short time (movement clusters)
+        if movement_clusters > 2:  # Adjust the threshold based on desired sensitivity
+            return True  # Restlessness detected
 
+        # Check if there is too much stillness, which may indicate deeper sleep
+        if still_duration > 5:  # Number of frames without significant movement
+            return False  # Assuming child is in deeper sleep (no restlessness)
 
+        # If movement count is too high (indicating constant movement), return True (restlessness)
+        if movement_count > 10:  # Adjust based on real-world tests
+            return True  # Restlessness detected
+
+    return False  # No poor sleep movement detected
 
 
 
@@ -111,7 +131,7 @@ def draw_pose(frame, keypoints, offset_x=0, offset_y=0):
         # Check if face is covered and alert if true
         if is_face_covered(keypoints):
             send_alert("Canh bao tre bi che mat!")  # Replace with your alert mechanism
-        if detect_convulsive_movement(keypoints):
+        if detect_poor_sleep_movement(keypoints):
             send_alert("Tre ngu khong ngon!")  
     return frame
 
