@@ -7,7 +7,7 @@ from person_detection import (
     detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, 
     save_bed_area, draw_bounding_boxes, is_person_outside_bed, is_sitting
 )
-from keypoint import estimate_pose, classify_posture, draw_pose
+from keypoint import estimate_pose, draw_pose, detect_poor_sleep_movement
 from alert_system import send_alert, display_alert_statistics
 import numpy as np
 
@@ -68,15 +68,13 @@ def process_person(frame, person, bed_areas):
             send_alert("Child is outside the bed!")
         else:
             keypoints = estimate_pose(person_frame)
-            if keypoints is not None:
-                posture = classify_posture(keypoints)
-                draw_pose(frame, keypoints, x1, y1)
-                if posture == "prone":
-                    send_alert("Child is prone!")
+            if detect_poor_sleep_movement(keypoints):
+               send_alert("Tre ngu khong ngon!")  # Alert for poor sleep movement
+            draw_pose(frame, keypoints, x1, y1)
 
 def process_video_feed():
     #cap = cv2.VideoCapture("rtsp://admin:BDTYDD@192.168.1.103:554")
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
@@ -125,7 +123,7 @@ def process_video_feed():
     plot_performance_metrics(performance_metrics)
 
 def plot_performance_metrics(metrics):
-    """Plot performance metrics over time."""
+    """Plot performance metrics over time and display their statistics."""
     plt.figure(figsize=(12, 10))
     titles = [
         ("FPS", "fps"), 
@@ -141,6 +139,18 @@ def plot_performance_metrics(metrics):
         plt.plot(metrics[key], label=title)
         plt.title(title)
         plt.legend()
+
+        # Calculate and display statistics
+        if metrics[key]:
+            data = np.array(metrics[key])
+            max_val = np.max(data)
+            min_val = np.min(data)
+            mean_val = np.mean(data)
+            print(f"{title} Statistics:")
+            print(f"  Max: {max_val}")
+            print(f"  Min: {min_val}")
+            print(f"  Mean/Average: {mean_val}")
+            print("-" * 30)
 
     plt.tight_layout()
     plt.show()
