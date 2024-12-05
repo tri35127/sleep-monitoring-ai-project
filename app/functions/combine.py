@@ -78,9 +78,9 @@ def process_video_feed(cap):
             if bed_areas:
                 for bed_area in bed_areas:
                     if is_sitting(person, bed_area):
-                        send_alert("Canh bao tre dang ngoi!")
+                        send_alert("tre dang ngoi!")
                     elif is_person_outside_bed(person, bed_area):
-                        send_alert("Canh bao tre roi khoi giuong!")
+                        send_alert("tre roi khoi giuong!")
                     else:
                         keypoints = estimate_pose(person_frame)
                         if keypoints is not None:
@@ -88,7 +88,7 @@ def process_video_feed(cap):
                             draw_pose(frame, keypoints, x1, y1)
 
                             if posture == "prone":
-                                send_alert("Canh bao tre nam sap!")
+                                send_alert("tre nam sap!")
 
         # Tính thời gian phản hồi cho mỗi khung hình
         end_time = time.time()
