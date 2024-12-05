@@ -3,6 +3,7 @@ import threading
 import os
 import cv2
 import queue
+import json
 from datetime import datetime
 import time
 from combine import process_video_feed
@@ -119,13 +120,15 @@ def replay_viewstats():
 
 ### Phần ViewStats ###
 
-# Background task để cập nhật dữ liệu vào queue 
+# Background task để cập nhật dữ liệu vào queue
 def push_updates_to_queue():
     while True:
         stats = display_last_alert()
         time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        event_queue.put(f" {time_now}-{stats}\n\n") # Định dạng dữ liệu th 
+        data = {"message": {stats}}
+        event_queue.put(f"data: {json.dumps(data, ensure_ascii=False)}\n\n")
         time.sleep(5) # Cập nhật mỗi 5 giây
+
 
 # Endpoint SSE để gửi dữ liệu realtime
 @app.route('/viewstats', methods=['GET'])
