@@ -3,9 +3,18 @@ import json
 from ultralytics import YOLO
 import torch
 
+import configparser
+import os
+
+# Construct the relative path to config.ini
+config_path = os.path.realpath("../config/config.ini")
+# Create a configuration object
+config = configparser.ConfigParser()
+config.read(config_path)
+
 device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
 model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
-CONFIG_FILE = "D:/sleep-monitoring-ai-project/app/config/bed.json"
+CONFIG_FILE = os.path.realpath("../config/bed.json")
 
 
 # Vẽ bounding box cho mỗi người

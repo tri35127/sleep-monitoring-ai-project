@@ -1,10 +1,9 @@
 import configparser
 import os
-import sys
 import mysql.connector
 
 # Construct the relative path to config.ini
-config_path = os.path.realpath("../config.ini")
+config_path = os.path.realpath("../config/config.ini")
 # Create a configuration object
 config = configparser.ConfigParser()
 config.read(config_path)

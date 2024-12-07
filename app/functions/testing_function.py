@@ -10,6 +10,15 @@ from person_detection import (
 from keypoint import estimate_pose, draw_pose, detect_poor_sleep_movement
 from alert_system import send_alert, display_alert_statistics
 import numpy as np
+import configparser
+import os
+
+# Construct the relative path to config.ini
+config_path = os.path.realpath("../config/config.ini")
+# Create a configuration object
+config = configparser.ConfigParser()
+config.read(config_path)
+
 
 # Performance metrics
 performance_metrics = {

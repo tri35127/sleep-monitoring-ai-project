@@ -127,10 +127,5 @@ def draw_pose(frame, keypoints, offset_x=0, offset_y=0):
                 x, y = int(keypoint[0]) + offset_x, int(keypoint[1]) + offset_y
                 cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)  # Draw keypoint (red)
                 cv2.putText(frame, str(i), (x + 5, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
-        
-        # Check if face is covered and alert if true
-        if is_face_covered(keypoints):
-            send_alert("Canh bao tre bi che mat!")  # Replace with your alert mechanism
-        if detect_poor_sleep_movement(keypoints):
-            send_alert("Tre ngu khong ngon!")  
+
     return frame
