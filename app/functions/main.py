@@ -5,6 +5,7 @@ import cv2
 import queue
 import json
 from datetime import datetime
+from person_detection import detect_person, create_bed_area_from_person_bbox, save_bed_area
 import time
 from combine import process_video_feed
 from alert_system import display_last_alert
@@ -33,63 +34,18 @@ def video_feed():
 
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route("/checkcam/alert", methods=["GET"])
-def checkcam_alert():
-    """Trả về cảnh báo hiện tại từ backend."""
-    global alerts_count
-    return jsonify({"alerts_count": alerts_count})
-
-
-@app.route("/checkcam/record", methods=["POST"])
-def checkcam_record():
-    """Quay video và thiết lập vùng giường."""
-    global camera_status, recorded_videos
-
-    if camera_status["is_active"]:
-        return jsonify({"error": "Camera is already in use!"}), 400
-
-    # Lấy ID camera từ yêu cầu
-    camera_id = request.json.get("camera_id", 0)
-    camera_status["camera_id"] = camera_id
-    camera_status["is_active"] = True
-
-    # Tạo file video
-    video_name = f"record_{len(recorded_videos) + 1}.avi"
-    video_path = os.path.join("recorded_videos", video_name)
-    os.makedirs("recorded_videos", exist_ok=True)
-
-    # Thread để quay video
-    def record():
-        cap = cv2.VideoCapture(camera_id)
-        if not cap.isOpened():
-            camera_status["is_active"] = False
-            return
-
-        fourcc = cv2.VideoWriter_fourcc(*"XVID")
-        out = cv2.VideoWriter(video_path, fourcc, 20.0, (640, 480))
-
-        while camera_status["is_active"]:
-            ret, frame = cap.read()
-            if ret:
-                processed_frame = process_video_feed(frame)  # Xử lý khung hình trong combine.py
-                out.write(processed_frame)
-            else:
-                break
-
-        cap.release()
-        out.release()
-        recorded_videos.append(video_name)
-        camera_status["is_active"] = False
-
-    threading.Thread(target=record).start()
-    return jsonify({"message": "Recording started", "video_name": video_name})
-
 
 @app.route("/checkcam/resetbeds", methods=["POST"])
 def checkcam_resetbeds():
     """Reset vùng giường."""
-    from combine import save_bed_area  # Import tại đây để tránh dependency loop
-    save_bed_area([])  # Reset vùng giường
+    cap = cv2.VideoCapture(0)
+    success, frame = process_video_feed(cap)
+    bed_areas = []
+    persons = detect_person(frame, None)
+    for person in persons:
+        bed_area = create_bed_area_from_person_bbox(person)
+        bed_areas.append(bed_area)
+    save_bed_area(bed_areas)
     return jsonify({"message": "Bed areas reset successfully"})
 
 

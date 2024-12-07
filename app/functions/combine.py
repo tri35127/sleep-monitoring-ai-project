@@ -78,9 +78,3 @@ def process_video_feed(cap):
         return ret, frame
     cap.release()
     cv2.destroyAllWindows()
-
-
-if __name__ == "__main__":
-    process_video_feed()
-    #display_alert_statistics()
-    #display_performance_statistics(fps_list, response_times, cpu_usages, memory_usages, gpu_usages, gpu_memory_usages)
