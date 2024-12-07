@@ -3,7 +3,7 @@ import numpy as np
 from alert_system import send_alert  # Make sure this module is available
 import torch
 from ultralytics import YOLO
-
+from scipy.ndimage import gaussian_filter1d
 import os
 import configparser
 # Construct the relative path to config.ini
@@ -12,71 +12,103 @@ config_path = os.path.realpath("../config/config.ini")
 config = configparser.ConfigParser()
 config.read(config_path)
 
-# Load YOLO Pose model
+# Load YOLO Pose models
 device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
-model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11x-pose.pt").to(device)
-# Export the model to ONNX format
-initial_posture = None  # Theo dõi tư thế ban đầu
+model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11m-pose.pt").to(device)
+
+keypoint_history = []  # Store historical keypoint positions for convulsion detection
+HISTORY_SIZE = 10  # Number of frames to analyze for convulsive detection
 
 def estimate_pose(frame):
-    # Thực hiện suy luận với YOLO trên thiết bị đã chỉ định (GPU hoặc CPU)
-    results = model.predict(frame, verbose=False, device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+    # Perform inference with YOLO on the specified device (GPU or CPU)
+    results = model.predict(frame, verbose=False, device=device)
 
     keypoints = []
     for result in results:
         if hasattr(result, 'keypoints') and result.keypoints is not None:
-            keypoints = result.keypoints.xy.cpu().numpy()  # Lấy keypoints dưới dạng mảng numpy
-    return keypoints if len(keypoints) > 0 else None  # Trả về None nếu không phát hiện keypoints
+           keypoints = result.keypoints.xy.cpu().numpy()  # Get keypoints as numpy array
+    return keypoints if len(keypoints) > 0 else None  # Return None if no keypoints are detected
+    
 
-# Phân loại tư thế dựa trên vị trí tương đối của keypoints vai và hông
-def classify_posture(keypoints):
-    if keypoints is None:
-        return "unknown"
+# Detect poor sleep movements based on keypoint motion patterns
 
-    # Xác định các keypoints cho vai trái, vai phải, hông trái, hông phải
-    left_shoulder, right_shoulder, left_hip, right_hip = None, None, None, None
+def detect_poor_sleep_movement(keypoints):
+    global keypoint_history
 
-    # Giả sử keypoints[0] chứa tất cả các keypoints cho các bộ phận cơ thể
-    for i, keypoint in enumerate(keypoints[0]):
-        if i == 5:  # Vai trái
-            left_shoulder = keypoint
-        elif i == 6:  # Vai phải
-            right_shoulder = keypoint
-        elif i == 11:  # Hông trái
-            left_hip = keypoint
-        elif i == 12:  # Hông phải
-            right_hip = keypoint
+    if keypoints is None or len(keypoints) == 0:
+        return False  # No keypoints detected, no convulsion
 
-    # Đảm bảo tất cả keypoints đều không phải None và có tọa độ hợp lệ
-    if (left_shoulder is not None and right_shoulder is not None and
-        left_hip is not None and right_hip is not None and
-        left_shoulder.size > 0 and right_shoulder.size > 0 and
-        left_hip.size > 0 and right_hip.size > 0):
-        
-        # Nếu vai trái ở bên phải vai phải và hông trái ở bên phải hông phải,
-        # Chỉ ra tư thế nằm ngửa (supine).
-        if left_shoulder[0] > right_shoulder[0] and left_hip[0] > right_hip[0]:
-            return "supine"
-        
-        # Nếu vai trái ở bên trái vai phải và hông trái ở bên trái hông phải,
-        # điều này có thể chỉ ra tư thế nằm sấp (prone).
-        elif left_shoulder[0] < right_shoulder[0] and left_hip[0] < right_hip[0]:
-            return "prone"
+    # Ensure the keypoints array is not empty and has sufficient data
+    if keypoints[0].shape[0] < 15:  # Ensure enough keypoints are available
+        return False  # Not enough keypoints, skip processing
 
-    return "unknown"  # Trả về unknown nếu các keypoints không đủ để phân loại tư thế
+    # Define indices for relevant keypoints
+    keypoint_indices = [7, 8, 13, 14]  # Left wrist, Right wrist, Left ankle, Right ankle
 
-# Phát hiện nếu tư thế đã thay đổi từ nằm ngửa sang nằm sấp hoặc ngược lại
-def has_posture_changed(current_posture):
-    global initial_posture
-    if initial_posture is None:
-        initial_posture = current_posture
-        return False  # Không thay đổi vì đây là tư thế lần đầu được phát hiện
+    # Extract relevant keypoints, using [0, 0] for missing keypoints
+    relevant_keypoints = [
+        keypoints[0][idx] if not np.array_equal(keypoints[0][idx], [0, 0]) else [0, 0]
+        for idx in keypoint_indices
+    ]
 
-    # Kiểm tra nếu tư thế đã thay đổi
-    if current_posture != initial_posture:
-        initial_posture = current_posture  # Cập nhật tư thế ban đầu với tư thế mới
-        return True  # Tư thế đã thay đổi
-    return False
+    # Append the current keypoints to the history
+    keypoint_history.append(relevant_keypoints)
+    if len(keypoint_history) > HISTORY_SIZE:
+        keypoint_history.pop(0)  # Maintain a fixed history size
+
+    # Apply smoothing to reduce jitter if we have enough data
+    if len(keypoint_history) >= HISTORY_SIZE:
+        smoothed_history = gaussian_filter1d(keypoint_history, sigma=1, axis=0)
+
+        # Calculate velocities using smoothed history
+        velocities = []
+        for i in range(len(keypoint_indices)):
+            motion = []
+            for t in range(1, HISTORY_SIZE):
+                # Compute velocity between consecutive frames
+                v = np.linalg.norm(
+                    np.array(smoothed_history[t][i]) - np.array(smoothed_history[t-1][i])
+                )
+                motion.append(v)
+            velocities.append(motion)
+
+        # Analyze motion patterns
+        sustained_spikes = 0
+        movement_count = 0
+        still_duration = 0
+        movement_clusters = 0
+        for motion in velocities:
+            # Movement Intensity & Frequency: High variance in velocity could indicate convulsion
+            if np.std(motion) > 3.0 and np.max(motion) > 20.0:  # Adjust thresholds as needed
+                sustained_spikes += 1
+            # Count how many movements are above a certain intensity (e.g., larger than 5 units of velocity)
+            movement_count += sum(1 for v in motion if v > 5.0)
+            # Detect clusters of rapid movement
+            movement_clusters += sum(1 for t in range(1, len(motion)) if motion[t] > 5.0 and motion[t-1] > 5.0)
+
+        # Track Duration of Stillness
+        if sustained_spikes == 0 and movement_count == 0:
+            still_duration += 1
+
+        # Analyze the results based on thresholds
+        if sustained_spikes >= 2:  # At least two keypoints show convulsive patterns
+            return True  # Convulsion detected
+
+        # Check for restlessness: frequent movements within a short time (movement clusters)
+        if movement_clusters > 2:  # Adjust the threshold based on desired sensitivity
+            return True  # Restlessness detected
+
+        # Check if there is too much stillness, which may indicate deeper sleep
+        if still_duration > 5:  # Number of frames without significant movement
+            return False  # Assuming child is in deeper sleep (no restlessness)
+
+        # If movement count is too high (indicating constant movement), return True (restlessness)
+        if movement_count > 10:  # Adjust based on real-world tests
+            return True  # Restlessness detected
+
+    return False  # No poor sleep movement detected
+
+
 
 # Check if specific facial keypoints are covered (e.g., keypoints 0, 1, and 2)
 def is_face_covered(keypoints):
@@ -99,4 +131,6 @@ def draw_pose(frame, keypoints, offset_x=0, offset_y=0):
         # Check if face is covered and alert if true
         if is_face_covered(keypoints):
             send_alert("Canh bao tre bi che mat!")  # Replace with your alert mechanism
+        if detect_poor_sleep_movement(keypoints):
+            send_alert("Tre ngu khong ngon!")  
     return frame

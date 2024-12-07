@@ -74,7 +74,7 @@ def process_person(frame, person, bed_areas):
 
 def process_video_feed():
     #cap = cv2.VideoCapture("rtsp://admin:BDTYDD@192.168.1.103:554")
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 

@@ -42,7 +42,7 @@ def send_alert(message):
     global last_alert_time, alerts_count, alert
     if can_send_alert():
         show_alert(message)
-        alert_to_db(message)
+        #alert_to_db(message)
         last_alert_time = datetime.now()
         alerts_count += 1  # Tăng tổng số lượng cảnh báo
         alert_counter[message] += 1  # Tăng số lượng cho loại cảnh báo này
@@ -56,6 +56,7 @@ def display_alert_statistics():
     for alert_type, count in alert_counter.items():
         print(f"  {alert_type}: {count}")
     return alert_counter
+
 
 
 def display_last_alert():

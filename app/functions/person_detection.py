@@ -4,7 +4,7 @@ from ultralytics import YOLO
 import torch
 
 device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
-model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11x.pt").to(device)
+model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
 CONFIG_FILE = "D:/sleep-monitoring-ai-project/app/config/bed.json"
 
 
@@ -69,7 +69,7 @@ def calculate_intersection_area(person_bbox, bed_area):
     return calculate_area(inter_x1, inter_y1, inter_x2, inter_y2)
 
 # Kiểm tra nếu người ở ngoài vùng giường 
-def is_person_outside_bed(person_bbox, bed_area, threshold=0.42): #threshold càng to, càng dễ thông báo
+def is_person_outside_bed(person_bbox, bed_area, threshold=0.4): #threshold càng to, càng dễ thông báo
     person_area = calculate_area(*map(int, person_bbox))
     intersection_area = calculate_intersection_area(person_bbox, bed_area)
 
@@ -80,7 +80,7 @@ def is_person_outside_bed(person_bbox, bed_area, threshold=0.42): #threshold cà
     return False
 
 # Kiểm tra trạng thái ngồi dựa trên giao nhau 90 độ và box gần vuông
-def is_sitting(person_bbox, bed_area, overlap_threshold=0.5, aspect_ratio_threshold=0.35):
+def is_sitting(person_bbox, bed_area, overlap_threshold=0.45, aspect_ratio_threshold=0.6):
     p_x1, p_y1, p_x2, p_y2 = map(int, person_bbox)
     b_x1, b_y1, b_x2, b_y2 = bed_area
 
