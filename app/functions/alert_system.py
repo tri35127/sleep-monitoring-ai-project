@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from collections import Counter, defaultdict
+from collections import Counter
 import os
 import configparser
 from database import Database
@@ -14,7 +14,7 @@ last_alert_time = None
 alert_counter = Counter()
 alert = []
 # Minimum time between alerts (10 seconds)
-ALERT_INTERVAL = timedelta(seconds=10)
+ALERT_INTERVAL = timedelta(seconds=config.getint("alert_system","timedelta"))
 
 # Display alert by printing to the console
 def show_alert(message):

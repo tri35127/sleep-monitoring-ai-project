@@ -12,10 +12,10 @@ config.read(config_path)
 class Database:
     def __init__(self):
         self.conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="events_logs"
+            host=config.get('db_config', 'db_host'),
+            user=config.get('db_config', 'db_user'),
+            password=config.get('db_config', 'db_password'),
+            database=config.get('db_config', 'db_name')
         )
         self.cursor = self.conn.cursor()
 

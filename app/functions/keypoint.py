@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from alert_system import send_alert  # Make sure this module is available
 import torch
 from ultralytics import YOLO
 from scipy.ndimage import gaussian_filter1d
@@ -13,11 +12,16 @@ config = configparser.ConfigParser()
 config.read(config_path)
 
 # Load YOLO Pose models
-device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
-model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11m-pose.pt").to(device)
+if torch.cuda.is_available():
+    device = torch.device("cuda:0")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu") # Set the device to GPU
+model = YOLO(config.get('keypoint', 'yolo_model_pose_path')).to(device)
 
 keypoint_history = []  # Store historical keypoint positions for convulsion detection
-HISTORY_SIZE = 10  # Number of frames to analyze for convulsive detection
+HISTORY_SIZE = config.getint('keypoint', 'frame_to_analyze_sleep_movement')  # Number of frames to analyze for convulsive detection
 
 def estimate_pose(frame):
     # Perform inference with YOLO on the specified device (GPU or CPU)
@@ -79,10 +83,10 @@ def detect_poor_sleep_movement(keypoints):
         movement_clusters = 0
         for motion in velocities:
             # Movement Intensity & Frequency: High variance in velocity could indicate convulsion
-            if np.std(motion) > 3.0 and np.max(motion) > 20.0:  # Adjust thresholds as needed
+            if np.std(motion) > config.getfloat('keypoint', 'max_standard_deviation_velocity') and np.max(motion) > config.getfloat('keypoint', 'max_velocity_of_one_keypoint'):  # Adjust thresholds as needed
                 sustained_spikes += 1
             # Count how many movements are above a certain intensity (e.g., larger than 5 units of velocity)
-            movement_count += sum(1 for v in motion if v > 5.0)
+            movement_count += sum(1 for v in motion if v > config.getfloat('keypoint', 'max_velocity'))
             # Detect clusters of rapid movement
             movement_clusters += sum(1 for t in range(1, len(motion)) if motion[t] > 5.0 and motion[t-1] > 5.0)
 
@@ -91,11 +95,11 @@ def detect_poor_sleep_movement(keypoints):
             still_duration += 1
 
         # Analyze the results based on thresholds
-        if sustained_spikes >= 2:  # At least two keypoints show convulsive patterns
+        if sustained_spikes >= config.getint('keypoint', 'max_sustained_spike'):  # At least two keypoints show convulsive patterns
             return True  # Convulsion detected
 
         # Check for restlessness: frequent movements within a short time (movement clusters)
-        if movement_clusters > 2:  # Adjust the threshold based on desired sensitivity
+        if movement_clusters > config.getint('keypoint', 'max_movement_cluster'):  # Adjust the threshold based on desired sensitivity
             return True  # Restlessness detected
 
         # Check if there is too much stillness, which may indicate deeper sleep
@@ -103,7 +107,7 @@ def detect_poor_sleep_movement(keypoints):
             return False  # Assuming child is in deeper sleep (no restlessness)
 
         # If movement count is too high (indicating constant movement), return True (restlessness)
-        if movement_count > 10:  # Adjust based on real-world tests
+        if movement_count > config.getint('keypoint', 'max_movement_count'):  # Adjust based on real-world tests
             return True  # Restlessness detected
 
     return False  # No poor sleep movement detected

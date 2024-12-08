@@ -7,7 +7,7 @@ from person_detection import (
     detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, 
     save_bed_area, draw_bounding_boxes, is_person_outside_bed, is_sitting
 )
-from keypoint import estimate_pose, draw_pose, detect_poor_sleep_movement
+from keypoint import estimate_pose, draw_pose, detect_poor_sleep_movement, is_face_covered
 from alert_system import send_alert, display_alert_statistics
 import numpy as np
 import configparser
@@ -70,22 +70,27 @@ def process_person(frame, person, bed_areas):
     person_frame = frame[y1:y2, x1:x2]
     draw_bounding_boxes(frame, [person])
 
-    for bed_area in bed_areas:
-        if is_sitting(person, bed_area):
-            send_alert("Child is sitting!")
-        elif is_person_outside_bed(person, bed_area):
-            send_alert("Child is outside the bed!")
-        else:
-            keypoints = estimate_pose(person_frame)
-            if detect_poor_sleep_movement(keypoints):
-               send_alert("Tre ngu khong ngon!")  # Alert for poor sleep movement
-            draw_pose(frame, keypoints, x1, y1)
+    if bed_areas:
+        for bed_area in bed_areas:
+            if is_sitting(person, bed_area):
+                send_alert(config.get("alert_system", "is_sitting_alert"))
+            elif is_person_outside_bed(person, bed_area):
+                send_alert(config.get("alert_system", "is_person_outside_bed_alert"))
+            else:
+                keypoints = estimate_pose(person_frame)
+                if keypoints is not None:
+                    if is_face_covered(keypoints):
+                        send_alert(
+                            config.get("alert_system", "is_face_covered_alert"))  # Replace with your alert mechanism
+                    if detect_poor_sleep_movement(keypoints):
+                        send_alert(config.get("alert_system", "poor_sleep_movement_alert"))
+                draw_pose(frame, keypoints, x1, y1)
 
 def process_video_feed():
     #cap = cv2.VideoCapture("rtsp://admin:BDTYDD@192.168.1.103:554")
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    cap = cv2.VideoCapture(config.getint("camera", "camera_id"))
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.getint("camera", "width"))
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.getint("camera", "height"))
 
     bed_areas = load_bed_area() or []
     prev_frame_time = 0

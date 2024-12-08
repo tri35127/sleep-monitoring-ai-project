@@ -19,11 +19,11 @@ config.read(config_path)
 app = Flask(__name__)
 event_queue = queue.Queue()  # Queue để lưu trữ các sự kiện cần gửi
 
-@app.route('/checkcam/source', methods=['GET'])
+@app.route(config.get("route", "video_feed"), methods=['GET'])
 def video_feed():
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    cap = cv2.VideoCapture(config.getint("camera", "camera_id"))
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.getint("camera", "width"))
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.getint("camera", "height"))
     def generate_frames():
         while True:
             success, frame = process_video_feed(cap)
@@ -39,7 +39,7 @@ def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route("/checkcam/resetbeds", methods=["POST"])
+@app.route(config.get("route", "reset_beds"), methods=["POST"])
 def checkcam_resetbeds():
     """Reset vùng giường."""
     cap = cv2.VideoCapture(0)
@@ -66,12 +66,12 @@ def push_updates_to_queue():
             data = {"message": {stats}}
             event_queue.put(f"data: {json.dumps(str(data), ensure_ascii=False)}\n\n")
         else:
-            event_queue.put(None)
+            event_queue.put(":\n\n")
         time.sleep(5) # Cập nhật mỗi 5 giây
 
 
 # Endpoint SSE để gửi dữ liệu realtime
-@app.route('/viewstats', methods=['GET'])
+@app.route(config.get("route", "view_stats"), methods=['GET'])
 def viewstats():
     def event_stream():
         while True:

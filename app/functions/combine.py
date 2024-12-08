@@ -3,6 +3,14 @@ import time
 from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes, is_person_outside_bed, is_sitting
 from keypoint import estimate_pose, detect_poor_sleep_movement, draw_pose, is_face_covered
 from alert_system import send_alert
+import configparser
+import os
+
+# Construct the relative path to config.ini
+config_path = os.path.realpath("../config/config.ini")
+# Create a configuration object
+config = configparser.ConfigParser()
+config.read(config_path)
 
 
 def process_video_feed(cap):
@@ -42,16 +50,16 @@ def process_video_feed(cap):
             if bed_areas:
                 for bed_area in bed_areas:
                     if is_sitting(person, bed_area):
-                        send_alert("Canh bao tre dang ngoi!")
+                        send_alert(config.get("alert_system", "is_sitting_alert"))
                     elif is_person_outside_bed(person, bed_area):
-                        send_alert("Canh bao tre roi khoi giuong!")
+                        send_alert(config.get("alert_system", "is_person_outside_bed_alert"))
                     else:
                         keypoints = estimate_pose(person_frame)
                         if keypoints is not None:
                             if is_face_covered(keypoints):
-                                send_alert("Canh bao tre bi che mat!")  # Replace with your alert mechanism
+                                send_alert(config.get("alert_system", "is_face_covered_alert"))  # Replace with your alert mechanism
                             if detect_poor_sleep_movement(keypoints):
-                                send_alert("Tre ngu khong ngon!")
+                                send_alert(config.get("alert_system", "poor_sleep_movement_alert"))
                         draw_pose(frame, keypoints, x1, y1)
 
 

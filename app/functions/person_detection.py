@@ -12,8 +12,15 @@ config_path = os.path.realpath("../config/config.ini")
 config = configparser.ConfigParser()
 config.read(config_path)
 
-device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # Set the device to GPU
-model = YOLO("D:/sleep-monitoring-ai-project/data/yolo11l.pt").to(device)
+if torch.cuda.is_available():
+    device = torch.device("cuda:0")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu")
+print(f"Using device: {device}")
+
+model = YOLO(config.get('person_detection', 'yolo_model_detection_path')).to(device)
 CONFIG_FILE = os.path.realpath("../config/bed.json")
 
 
@@ -42,7 +49,7 @@ def draw_bed_area(frame, bed_area):
     cv2.rectangle(frame, (bed_x1, bed_y1), (bed_x2, bed_y2), (255, 0, 0), 2)  # Xanh dương
 
 # Tạo vùng giường từ bounding box của người, với tỉ lệ phóng to 1.05x
-def create_bed_area_from_person_bbox(bbox, scale_factor=1.15):
+def create_bed_area_from_person_bbox(bbox, scale_factor=config.getfloat('person_detection', 'bed_scale_factor')):
     x1, y1, x2, y2 = map(int, bbox)
     width = x2 - x1
     height = y2 - y1
@@ -78,7 +85,7 @@ def calculate_intersection_area(person_bbox, bed_area):
     return calculate_area(inter_x1, inter_y1, inter_x2, inter_y2)
 
 # Kiểm tra nếu người ở ngoài vùng giường 
-def is_person_outside_bed(person_bbox, bed_area, threshold=0.4): #threshold càng to, càng dễ thông báo
+def is_person_outside_bed(person_bbox, bed_area, threshold=config.getfloat('person_detection', 'is_person_outside_bed_threshold')): #threshold càng to, càng dễ thông báo
     person_area = calculate_area(*map(int, person_bbox))
     intersection_area = calculate_intersection_area(person_bbox, bed_area)
 
@@ -89,7 +96,7 @@ def is_person_outside_bed(person_bbox, bed_area, threshold=0.4): #threshold càn
     return False
 
 # Kiểm tra trạng thái ngồi dựa trên giao nhau 90 độ và box gần vuông
-def is_sitting(person_bbox, bed_area, overlap_threshold=0.45, aspect_ratio_threshold=0.6):
+def is_sitting(person_bbox, bed_area, overlap_threshold=config.getfloat('person_detection', 'is_sitting_overlap_threshold'), aspect_ratio_threshold=config.getfloat('person_detection', 'is_sitting_aspect_ratio_threshold')):
     p_x1, p_y1, p_x2, p_y2 = map(int, person_bbox)
     b_x1, b_y1, b_x2, b_y2 = bed_area
 
