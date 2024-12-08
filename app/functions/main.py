@@ -8,12 +8,14 @@ import time
 from combine import process_video_feed
 from alert_system import display_last_alert
 import configparser
+import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 # Construct the relative path to config.ini
 config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
 # Create a configuration object
-config = configparser.ConfigParser()
+config = configparser.ConfigParser()    
 config.read(config_path)
 
 app = Flask(__name__)
@@ -42,7 +44,9 @@ def video_feed():
 @app.route(config.get("route", "reset_beds"), methods=["POST"])
 def checkcam_resetbeds():
     """Reset vùng giường."""
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(config.getint("camera", "camera_id"))
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.getint("camera", "width"))
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.getint("camera", "height"))
     success, frame = process_video_feed(cap)
     bed_areas = []
     persons = detect_person(frame, None)
@@ -61,11 +65,12 @@ def push_updates_to_queue():
     last_stats = None
     while True:
         stats = display_last_alert()
+        stats = str(stats)
         if stats != last_stats:
             last_stats = stats
-            data = {"message": {stats}}
-            event_queue.put(f"data: {json.dumps(str(data), ensure_ascii=False)}\n\n")
-        else:
+            data = {"message": stats}
+            event_queue.put(f"data: {json.dumps(data, ensure_ascii=False)}\n\n")
+        else:  
             event_queue.put(":\n\n")
         time.sleep(5) # Cập nhật mỗi 5 giây
 

@@ -21,7 +21,7 @@ else:
 print(f"Using device: {device}")
 
 model = YOLO(config.get('person_detection', 'yolo_model_detection_path')).to(device)
-CONFIG_FILE = os.path.realpath("../config/bed.json")
+CONFIG_FILE = os.path.realpath("../sleep-monitoring-ai-project/app/config/bed.json")
 
 
 # Vẽ bounding box cho mỗi người

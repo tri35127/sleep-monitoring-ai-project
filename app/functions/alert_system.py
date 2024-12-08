@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from collections import Counter
 import os
 import configparser
-from app.database.database import Database
+from database.database import Database
 # Construct the relative path to config.ini
 config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
 # Create a configuration object
