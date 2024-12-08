@@ -6,7 +6,8 @@ from scipy.ndimage import gaussian_filter1d
 import os
 import configparser
 # Construct the relative path to config.ini
-config_path = os.path.realpath("../config/config.ini")
+config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
+print(config_path)
 # Create a configuration object
 config = configparser.ConfigParser()
 config.read(config_path)

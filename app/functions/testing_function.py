@@ -12,9 +12,10 @@ from alert_system import send_alert, display_alert_statistics
 import numpy as np
 import configparser
 import os
+import torch
 
 # Construct the relative path to config.ini
-config_path = os.path.realpath("../config/config.ini")
+config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
 # Create a configuration object
 config = configparser.ConfigParser()
 config.read(config_path)
@@ -53,7 +54,10 @@ def update_performance_metrics(start_time):
     # System resource usage
     performance_metrics["cpu_usages"].append(psutil.cpu_percent())
     performance_metrics["memory_usages"].append(psutil.virtual_memory().percent)
-    gpu_util, gpu_mem = get_gpu_usage()
+    if torch.cuda.is_available():
+        gpu_util, gpu_mem = get_gpu_usage()
+    else:
+        gpu_util, gpu_mem = [0,0]
     if gpu_util is not None:
         performance_metrics["gpu_usages"].append(gpu_util)
         performance_metrics["gpu_memory_usages"].append(gpu_mem)

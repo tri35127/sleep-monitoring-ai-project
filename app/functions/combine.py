@@ -7,7 +7,7 @@ import configparser
 import os
 
 # Construct the relative path to config.ini
-config_path = os.path.realpath("../config/config.ini")
+config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
 # Create a configuration object
 config = configparser.ConfigParser()
 config.read(config_path)
