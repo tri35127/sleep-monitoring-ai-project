@@ -30,7 +30,7 @@ def access_camera():
         return cap
 
 
-@app.route(config.get("route", "video_feed"), methods=['GET'])
+@app.route("/checkcam/source", methods=['GET'])
 def video_feed():
     cap = access_camera()
     def generate_frames():
@@ -49,7 +49,7 @@ def video_feed():
 
 
 
-@app.route(config.get("route", "reset_beds"), methods=["POST"])
+@app.route("/resetbeds", methods=["POST"])
 def checkcam_resetbeds():
     """Reset vùng giường."""
     cap = access_camera()
@@ -88,7 +88,7 @@ def push_updates_to_queue():
 
 
 # Endpoint SSE để gửi dữ liệu realtime
-@app.route(config.get("route", "view_stats"), methods=['GET'])
+@app.route("/viewstats", methods=['GET'])
 def viewstats():
     def event_stream():
         while True:

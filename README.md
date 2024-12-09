@@ -14,8 +14,6 @@ A comprehensive AI-powered system for monitoring sleep patterns, detecting anoma
     - [Events Logs Table](#events-logs-table)
 - [Model - Library](#model---library)
     - [`Yolo v11` and `Yolo v11 pose` model](#Yolo-v11-and-yolo-v11-pose-model)
-- [Function Endpoints](#function-endpoints)
-    - [Human Detection](#human-detection)
 - [Endpoint Usage](#endpoint-usage)
 - [Config](#config)
 
@@ -82,17 +80,9 @@ Start the application using the provided run script:
 
 ### API Usage
 
-#### Sending Requests
-
 - Use tools like `curl`, `Postman`, or your preferred HTTP client to send requests to the API endpoints.
   See the [Endpoint Usage](#endpoint-usage) for more information
 
-  
-
-#### API Responses
-
-- The API returns JSON responses containing the requested data or video streaming.
-  See the [Function Endpoints](#function-endpoints) for more information
 
 
 ## Default Database Information
@@ -132,17 +122,21 @@ Start the application using the provided run script:
 
 ### Video streaming
 
-- To view processed video stream, make a GET request to `{baseurl}/checkcam/source`.
+- To view processed video stream, make a `GET` request to `{baseurl}/checkcam/source`.
 - You can configure the AI threshold according to your needs in the `config.ini` file.
 
 ### Reset beds
 
-- To set/reset beds area based on the child's position, make a POST request to `{baseurl}/checkcam/resetbeds`.
+- To set/reset beds area based on the child's position, make a `POST` request to `{baseurl}/checkcam/resetbeds`.
 - The results will notify about the bed zone change success or failure
 
 ### View stats
-- To set/reset beds area based on the child's position, make a POST request to `{baseurl}/viewstats`.
+- To get the unusual notification , make a `GET` request to `{baseurl}/viewstats`.
 - The results will notify about the alert of anomalies
+
+### View all
+- To get all the unusual notification and counting of them , make a `GET` request to `{baseurl}/viewall`.
+- The results will show a list of alert of anomalies and frequency of each type of notification
 
 ## Config
 ```ini
@@ -157,14 +151,14 @@ db_password =
 db_name = events_logs
 
 [person_detection]
-yolo_model_detection_path = D:/sleep-monitoring-ai-project/data/yolo11l.pt
+yolo_model_detection_path = ../sleep-monitoring-ai-project/data/yolo11l.pt
 bed_scale_factor = 1.15
 is_person_outside_bed_threshold = 0.4
 is_sitting_overlap_threshold = 0.45
 is_sitting_aspect_ratio_threshold = 0.6
 
 [keypoint]
-yolo_model_pose_path = D:/sleep-monitoring-ai-project/data/yolo11m-pose.pt
+yolo_model_pose_path = ../sleep-monitoring-ai-project/data/yolo11m-pose.pt
 frame_to_analyze_sleep_movement = 10
 max_standard_deviation_velocity = 3.0
 max_velocity_of_one_keypoint = 20
@@ -180,9 +174,4 @@ is_sitting_alert = Canh bao tre dang ngoi!
 is_person_outside_bed_alert = Canh bao tre roi khoi giuong!
 is_face_covered_alert = Canh bao tre bi che mat!
 poor_sleep_movement_alert = Tre ngu khong ngon!
-
-[route]
-view_stats = /viewstats
-reset_beds = /checkcam/resetbeds
-video_feed = /checkcam/source
 ```
