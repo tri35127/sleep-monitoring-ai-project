@@ -9,12 +9,12 @@ from combine import process_video_feed
 from alert_system import display_last_alert
 from collections import Counter
 import configparser
-import sys
+import torch
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-# Construct the relative path to config.ini
-config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
+if torch.backends.mps.is_available():
+    config_path = os.path.realpath("../config/config.ini")
+else:
+    config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
 # Create a configuration object
 config = configparser.ConfigParser()    
 config.read(config_path)
@@ -100,7 +100,7 @@ def viewstats():
 
 
 @app.route("/viewall", methods=["GET"])
-def replay_viewstats():
+def view_all():
     """Trả về thống kê dạng danh sách."""
     # Loại bỏ mục 'None'
     filtered_alert_counter = {key: value for key, value in alert_counter.items() if key != "None"}

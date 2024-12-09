@@ -5,9 +5,12 @@ from keypoint import estimate_pose, detect_poor_sleep_movement, draw_pose, is_fa
 from alert_system import send_alert
 import configparser
 import os
+import torch
 
-# Construct the relative path to config.ini
-config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
+if torch.backends.mps.is_available():
+    config_path = os.path.realpath("../config/config.ini")
+else:
+    config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
 # Create a configuration object
 config = configparser.ConfigParser()
 config.read(config_path)

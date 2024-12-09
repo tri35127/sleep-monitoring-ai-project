@@ -6,8 +6,13 @@ import torch
 import configparser
 import os
 
-# Construct the relative path to config.ini
-config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
+if torch.backends.mps.is_available():
+    CONFIG_FILE = os.path.realpath("../config/bed.json")
+    config_path = os.path.realpath("../config/config.ini")
+else:
+    CONFIG_FILE = os.path.realpath("../sleep-monitoring-ai-project/app/config/bed.json")
+    config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
+
 # Create a configuration object
 config = configparser.ConfigParser()
 config.read(config_path)
@@ -21,9 +26,6 @@ else:
 print(f"Using device: {device}")
 
 model = YOLO(config.get('person_detection', 'yolo_model_detection_path')).to(device)
-CONFIG_FILE = os.path.realpath("../sleep-monitoring-ai-project/app/config/bed.json")
-
-
 # Vẽ bounding box cho mỗi người
 def draw_bounding_boxes(frame, persons):
     for person in persons:

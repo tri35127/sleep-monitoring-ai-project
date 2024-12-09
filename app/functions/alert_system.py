@@ -3,8 +3,12 @@ from collections import Counter
 import os
 import configparser
 from database.database import Database
-# Construct the relative path to config.ini
-config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
+import torch
+
+if torch.backends.mps.is_available():
+    config_path = os.path.realpath("../config/config.ini")
+else:
+    config_path = os.path.realpath("../sleep-monitoring-ai-project/app/config/config.ini")
 # Create a configuration object
 config = configparser.ConfigParser()
 config.read(config_path)
