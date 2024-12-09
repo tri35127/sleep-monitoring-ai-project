@@ -123,7 +123,7 @@ def is_sitting(person_bbox, bed_area, overlap_threshold=config.getfloat('person_
 
 # Phát hiện người và cảnh báo khi người ở ngoài giường hoặc đang ngồi
 def detect_person(frame, bed_areas=None):
-    results = model(frame, verbose=False, imgsz=320, device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+    results = model(frame, verbose=False, imgsz=320, device=device)
     persons = []
 
     for result in results:

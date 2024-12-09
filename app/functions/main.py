@@ -7,6 +7,7 @@ from person_detection import detect_person, create_bed_area_from_person_bbox, sa
 import time
 from combine import process_video_feed
 from alert_system import display_last_alert
+from collections import Counter
 import configparser
 import sys
 import os
@@ -20,12 +21,18 @@ config.read(config_path)
 
 app = Flask(__name__)
 event_queue = queue.Queue()  # Queue để lưu trữ các sự kiện cần gửi
+camera_lock = threading.Lock()
+def access_camera():
+    with camera_lock:
+        cap = cv2.VideoCapture(config.getint("camera", "camera_id"))
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.getint("camera", "width"))
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.getint("camera", "height"))
+        return cap
+
 
 @app.route(config.get("route", "video_feed"), methods=['GET'])
 def video_feed():
-    cap = cv2.VideoCapture(config.getint("camera", "camera_id"))
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.getint("camera", "width"))
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.getint("camera", "height"))
+    cap = access_camera()
     def generate_frames():
         while True:
             success, frame = process_video_feed(cap)
@@ -41,12 +48,11 @@ def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+
 @app.route(config.get("route", "reset_beds"), methods=["POST"])
 def checkcam_resetbeds():
     """Reset vùng giường."""
-    cap = cv2.VideoCapture(config.getint("camera", "camera_id"))
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.getint("camera", "width"))
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.getint("camera", "height"))
+    cap = access_camera()
     success, frame = process_video_feed(cap)
     bed_areas = []
     persons = detect_person(frame, None)
@@ -61,6 +67,10 @@ def checkcam_resetbeds():
 
 ### Phần ViewStats ###
 # Background task để cập nhật dữ liệu vào queue
+
+alert_counter = Counter()
+alert = []
+
 def push_updates_to_queue():
     last_stats = None
     while True:
@@ -69,6 +79,8 @@ def push_updates_to_queue():
         if stats != last_stats:
             last_stats = stats
             data = {"message": stats}
+            alert_counter[stats] += 1  # Tăng số lượng cho loại cảnh báo này
+            alert.append(stats)
             event_queue.put(f"data: {json.dumps(data, ensure_ascii=False)}\n\n")
         else:  
             event_queue.put(":\n\n")
@@ -85,6 +97,19 @@ def viewstats():
             yield event
 
     return Response(event_stream(), content_type='text/event-stream')
+
+
+@app.route("/viewall", methods=["GET"])
+def replay_viewstats():
+    """Trả về thống kê dạng danh sách."""
+    # Loại bỏ mục 'None'
+    filtered_alert_counter = {key: value for key, value in alert_counter.items() if key != "None"}
+    
+    # Tạo danh sách các cặp cảnh báo
+    stats = [{key: value} for key, value in filtered_alert_counter.items()]
+    
+    # Trả về dưới dạng JSON
+    return jsonify({"stats": stats})
 
 # Khởi chạy background task
 threading.Thread(target=push_updates_to_queue, daemon=True).start()

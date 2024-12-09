@@ -35,7 +35,6 @@ def can_send_alert():
     return False
 
 # Main function to send alerts
-alerts_count = 0  # Thêm biến này vào alert_system.py
 
 # Main function to send alerts
 def send_alert(message):
@@ -44,7 +43,6 @@ def send_alert(message):
         show_alert(message)
         #alert_to_db(message)
         last_alert_time = datetime.now()
-        alerts_count += 1  # Tăng tổng số lượng cảnh báo
         alert_counter[message] += 1  # Tăng số lượng cho loại cảnh báo này
         alert.append(message)
 
