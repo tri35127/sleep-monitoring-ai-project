@@ -93,8 +93,8 @@ def process_person(frame, person, bed_areas):
                 draw_pose(frame, keypoints, x1, y1)
 
 def process_video_feed():
-    #cap = cv2.VideoCapture("rtsp://admin:BDTYDD@192.168.1.103:554")
-    cap = cv2.VideoCapture(config.getint("camera", "camera_id"))
+    cap = cv2.VideoCapture("/Users/macbookairm1/Desktop/FPT/Capstone/Code/sleep-monitoring-ai-project/data/test3.mov")
+    #cap = cv2.VideoCapture(config.getint("camera", "camera_id"))
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.getint("camera", "width"))
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.getint("camera", "height"))
 

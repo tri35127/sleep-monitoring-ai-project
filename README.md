@@ -141,37 +141,38 @@ Start the application using the provided run script:
 ## Config
 ```ini
 [camera]
-camera_id = 0
-width = 1920
-height = 1080
+camera_id = 0               # The ID of the camera to use (usually 0 if only one camera is connected)
+width = 1920                # The width of the camera frame
+height = 1080               # The height of the camera frame
+
 [database]
-db_host = localhost
-db_user = root
-db_password =
-db_name = events_logs
+db_host = localhost          # The hostname or address of the database server
+db_user = root               # The username for database access
+db_password =                # The password for database access (left blank here)
+db_name = events_logs        # The name of the database used to store event logs
 
 [person_detection]
-yolo_model_detection_path = ../sleep-monitoring-ai-project/data/yolo11l.pt
-bed_scale_factor = 1.15
-is_person_outside_bed_threshold = 0.4
-is_sitting_overlap_threshold = 0.45
-is_sitting_aspect_ratio_threshold = 0.6
+yolo_model_detection_path = ../sleep-monitoring-ai-project/data/yolo11l.pt  # Path to the YOLO model for person detection
+bed_scale_factor = 1.15              # Scale factor for enlarging the bed area bounding box
+is_person_outside_bed_threshold = 0.4  # Threshold for detecting if a person is outside the bed (higher = more sensitive)
+is_sitting_overlap_threshold = 0.45   # Overlap ratio threshold for detecting if a person is sitting
+is_sitting_aspect_ratio_threshold = 0.6  # Aspect ratio threshold for detecting if a person is sitting
 
 [keypoint]
-yolo_model_pose_path = ../sleep-monitoring-ai-project/data/yolo11m-pose.pt
-frame_to_analyze_sleep_movement = 10
-max_standard_deviation_velocity = 3.0
-max_velocity_of_one_keypoint = 20
-max_velocity = 5
-number_of_frame = 5
-max_sustained_spike = 2
-max_movement_cluster = 2
-max_movement_count = 10
+yolo_model_pose_path = ../sleep-monitoring-ai-project/data/yolo11m-pose.pt  # Path to the YOLO model for pose estimation
+frame_to_analyze_sleep_movement = 10       # Number of frames to analyze for sleep movement
+max_standard_deviation_velocity = 3.0      # Maximum allowable standard deviation of velocity for keypoints
+max_velocity_of_one_keypoint = 20          # Maximum allowable velocity for a single keypoint
+max_velocity = 5                           # Maximum velocity threshold for normal movement
+number_of_frame = 5                        # Number of frames used for analysis
+max_sustained_spike = 2                    # Maximum number of sustained spikes indicating restlessness
+max_movement_cluster = 2                   # Maximum number of movement clusters allowed
+max_movement_count = 10                    # Maximum number of movements allowed before being flagged
 
 [alert_system]
-timedelta = 10
-is_sitting_alert = Canh bao tre dang ngoi!
-is_person_outside_bed_alert = Canh bao tre roi khoi giuong!
-is_face_covered_alert = Canh bao tre bi che mat!
-poor_sleep_movement_alert = Tre ngu khong ngon!
+timedelta = 10                                              # Time interval for triggering alerts in seconds
+is_sitting_alert = Canh bao tre dang ngoi!                  # Alert message when the child is sitting
+is_person_outside_bed_alert = Canh bao tre roi khoi giuong! # Alert message for a child outside the bed
+is_face_covered_alert = Canh bao tre bi che mat!            # Alert message for covered face
+poor_sleep_movement_alert = Tre ngu khong ngon!             # Alert message for poor sleep movements
 ```
