@@ -152,14 +152,14 @@ db_password =                # The password for database access (left blank here
 db_name = events_logs        # The name of the database used to store event logs
 
 [person_detection]
-yolo_model_detection_path = ../sleep-monitoring-ai-project/data/yolo11l.pt  # Path to the YOLO model for person detection
+yolo_model_detection_path = ../app/model/yolo11l.pt # Path to the YOLO model for person detection
 bed_scale_factor = 1.15              # Scale factor for enlarging the bed area bounding box
 is_person_outside_bed_threshold = 0.4  # Threshold for detecting if a person is outside the bed (higher = more sensitive)
 is_sitting_overlap_threshold = 0.45   # Overlap ratio threshold for detecting if a person is sitting
 is_sitting_aspect_ratio_threshold = 0.6  # Aspect ratio threshold for detecting if a person is sitting
 
 [keypoint]
-yolo_model_pose_path = ../sleep-monitoring-ai-project/data/yolo11m-pose.pt  # Path to the YOLO model for pose estimation
+yolo_model_pose_path = ../app/model/yolo11m-pose.pt  # Path to the YOLO model for pose estimation
 frame_to_analyze_sleep_movement = 10       # Number of frames to analyze for sleep movement
 max_standard_deviation_velocity = 3.0      # Maximum allowable standard deviation of velocity for keypoints
 max_velocity_of_one_keypoint = 20          # Maximum allowable velocity for a single keypoint
