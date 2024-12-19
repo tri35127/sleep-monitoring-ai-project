@@ -6,7 +6,9 @@ import json
 from person_detection import detect_person, create_bed_area_from_person_bbox, save_bed_area
 import time
 from combine import process_video_feed
-from alert_system import display_last_alert
+from alert_system import display_last_alert, alert_to_db
+from datetime import datetime
+from database.database import Database
 from collections import Counter
 import configparser
 import torch
@@ -79,6 +81,8 @@ def push_updates_to_queue():
         if stats != last_stats:
             last_stats = stats
             data = {"message": stats}
+            if stats != "None":
+                alert_to_db(stats)
             alert_counter[stats] += 1  # Tăng số lượng cho loại cảnh báo này
             alert.append(stats)
             event_queue.put(f"data: {json.dumps(data, ensure_ascii=False)}\n\n")
@@ -99,6 +103,8 @@ def viewstats():
     return Response(event_stream(), content_type='text/event-stream')
 
 
+db = Database()
+
 @app.route("/viewall", methods=["GET"])
 def view_all():
     """Trả về thống kê dạng danh sách."""
@@ -110,6 +116,20 @@ def view_all():
     
     # Trả về dưới dạng JSON
     return jsonify({"stats": stats})
+def replay_viewstats():
+    """
+    Trả về thống kê dạng danh sách gồm Timestamp và events_type trong ngày hôm nay.
+    """
+    # Lấy ngày hôm nay
+    today = datetime.now().strftime('%Y-%m-%d')
+    try:
+        # Lấy dữ liệu từ database của ngày hôm nay
+        alerts = db.export_alert_from_db(today)
+
+        # Trả về dữ liệu dưới dạng JSON
+        return jsonify({"date": today, "alerts": alerts})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Khởi chạy background task
 threading.Thread(target=push_updates_to_queue, daemon=True).start()

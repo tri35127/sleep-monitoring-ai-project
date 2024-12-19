@@ -45,7 +45,6 @@ def send_alert(message):
     global last_alert_time, alerts_count, alert
     if can_send_alert():
         show_alert(message)
-        #alert_to_db(message)
         last_alert_time = datetime.now()
         alert_counter[message] += 1  # Tăng số lượng cho loại cảnh báo này
         alert.append(message)

@@ -12,10 +12,10 @@ config.read(config_path)
 class Database:
     def __init__(self):
         self.conn = mysql.connector.connect(
-            host=config.get('db_config', 'db_host'),
-            user=config.get('db_config', 'db_user'),
-            password=config.get('db_config', 'db_password'),
-            database=config.get('db_config', 'db_name')
+            host=config.get('database', 'db_host'),
+            user=config.get('database', 'db_user'),
+            password=config.get('database', 'db_password'),
+            database=config.get('database', 'db_name')
         )
         self.cursor = self.conn.cursor()
 
@@ -32,6 +32,28 @@ class Database:
         except mysql.connector.Error as e:
             print(f"Error logging alert to database: {e}")
 
+    def export_alert_from_db(self, date):
+        """
+        Lấy dữ liệu Timestamp và events_type từ bảng 'logs' cho một ngày cụ thể.
+        """
+        try:
+            query = """
+            SELECT Timestamp, events_type 
+            FROM logs 
+            WHERE DATE(Timestamp) = %s
+            ORDER BY `Timestamp` DESC
+            """
+            self.cursor.execute(query, (date,))
+            results = self.cursor.fetchall()
+
+            # Format kết quả thành danh sách các cặp thời gian và sự kiện
+            alerts = [{"Timestamp": str(row[0])[-6:], "events_type": row[1]} for row in results]
+            print(f"Alerts exported successfully for date: {date}")
+            return alerts
+        except mysql.connector.Error as e:
+            print(f"Error exporting alerts from database: {e}")
+            return []
+        
     def close_connection(self):
         if self.conn.is_connected():
             self.cursor.close()

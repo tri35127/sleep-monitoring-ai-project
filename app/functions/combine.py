@@ -1,7 +1,7 @@
 import cv2
 import time
 from person_detection import detect_person, draw_bed_area, load_bed_area, create_bed_area_from_person_bbox, save_bed_area, draw_bounding_boxes, is_person_outside_bed, is_sitting
-from keypoint import estimate_pose, detect_poor_sleep_movement, draw_pose, is_face_covered
+from keypoint import estimate_pose, draw_pose, is_face_covered , detect_poor_sleep_movement
 from alert_system import send_alert
 import configparser
 import os
@@ -31,7 +31,6 @@ def process_video_feed(cap):
         fps = 1 / (new_frame_time - prev_frame_time)
         prev_frame_time = new_frame_time
         fps_text = f"FPS: {int(fps)}"
-
         key = cv2.waitKey(10) & 0xFF
         if key == ord('b'):
             bed_areas = []
@@ -62,6 +61,7 @@ def process_video_feed(cap):
                             if is_face_covered(keypoints):
                                 send_alert(config.get("alert_system", "is_face_covered_alert"))  # Replace with your alert mechanism
                             if detect_poor_sleep_movement(keypoints):
+                            
                                 send_alert(config.get("alert_system", "poor_sleep_movement_alert"))
                         draw_pose(frame, keypoints, x1, y1)
 

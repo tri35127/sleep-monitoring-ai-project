@@ -25,7 +25,7 @@ else:
 model = YOLO(config.get('keypoint', 'yolo_model_pose_path')).to(device)
 
 keypoint_history = []  # Store historical keypoint positions for convulsion detection
-HISTORY_SIZE = config.getint('keypoint', 'frame_to_analyze_sleep_movement')  # Number of frames to analyze for convulsive detection
+HISTORY_SIZE = config.getint('keypoint', 'frame_to_analyze_sleep_movement')  # Number of frames to analyze 
 
 def estimate_pose(frame):
     # Perform inference with YOLO on the specified device (GPU or CPU)
@@ -44,7 +44,7 @@ def detect_poor_sleep_movement(keypoints):
     global keypoint_history
 
     if keypoints is None or len(keypoints) == 0:
-        return False  # No keypoints detected, no convulsion
+        return False  # No keypoints detected, no restless
 
     # Ensure the keypoints array is not empty and has sufficient data
     if keypoints[0].shape[0] < 15:  # Ensure enough keypoints are available
@@ -66,7 +66,7 @@ def detect_poor_sleep_movement(keypoints):
 
     # Apply smoothing to reduce jitter if we have enough data
     if len(keypoint_history) >= HISTORY_SIZE:
-        smoothed_history = gaussian_filter1d(keypoint_history, sigma=1, axis=0)
+        smoothed_history = gaussian_filter1d(keypoint_history, sigma=3, axis=0)
 
         # Calculate velocities using smoothed history
         velocities = []
@@ -74,10 +74,13 @@ def detect_poor_sleep_movement(keypoints):
             motion = []
             for t in range(1, HISTORY_SIZE):
                 # Compute velocity between consecutive frames
-                v = np.linalg.norm(
-                    np.array(smoothed_history[t][i]) - np.array(smoothed_history[t-1][i])
-                )
-                motion.append(v)
+                displacement = np.array(smoothed_history[t][i]) - np.array(smoothed_history[t-1][i])
+                v = np.linalg.norm(displacement)
+                # Ignore movements below the minimum threshold
+                if v >= config.getfloat('keypoint', 'MIN_MOVEMENT_THRESHOLD'):
+                    motion.append(v)
+                else:
+                    motion.append(0.0)
             velocities.append(motion)
 
         # Analyze motion patterns
@@ -86,7 +89,7 @@ def detect_poor_sleep_movement(keypoints):
         still_duration = 0
         movement_clusters = 0
         for motion in velocities:
-            # Movement Intensity & Frequency: High variance in velocity could indicate convulsion
+            # Movement Intensity & Frequency: High variance in velocity could indicate restless
             if np.std(motion) > config.getfloat('keypoint', 'max_standard_deviation_velocity') and np.max(motion) > config.getfloat('keypoint', 'max_velocity_of_one_keypoint'):  # Adjust thresholds as needed
                 sustained_spikes += 1
             # Count how many movements are above a certain intensity (e.g., larger than 5 units of velocity)
@@ -99,8 +102,8 @@ def detect_poor_sleep_movement(keypoints):
             still_duration += 1
 
         # Analyze the results based on thresholds
-        if sustained_spikes >= config.getint('keypoint', 'max_sustained_spike'):  # At least two keypoints show convulsive patterns
-            return True  # Convulsion detected
+        if sustained_spikes >= config.getint('keypoint', 'max_sustained_spike'):  # At least two keypoints show restless patterns
+            return True  # restless detected
 
         # Check for restlessness: frequent movements within a short time (movement clusters)
         if movement_clusters > config.getint('keypoint', 'max_movement_cluster'):  # Adjust the threshold based on desired sensitivity

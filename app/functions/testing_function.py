@@ -97,7 +97,7 @@ def process_video_feed():
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.getint("camera", "width"))
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.getint("camera", "height"))
 
-    bed_areas = load_bed_area() or []
+    bed_areas = load_bed_area()
     prev_frame_time = 0
 
     while cap.isOpened():
