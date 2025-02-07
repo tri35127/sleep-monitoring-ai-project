@@ -38,7 +38,7 @@ A comprehensive AI-powered system for monitoring sleep patterns, detecting anoma
     - RAM: 8GB
   - Recommended:
     - CPU: Intel® Core™ i5-11400 / Apple M1 Pro
-    - GPU: NVIDIA GeForce GTX 3050 / Apple M2 Pro
+    - GPU: NVIDIA GeForce GTX 3050 / Apple M1 Pro
     - RAM: 16GB
 ### Installation
 
